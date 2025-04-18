@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Amnesia: The Dark Descent.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "LuxWinSocketInit.h"
 
 #include "LuxMap.h"
 
@@ -43,6 +44,56 @@
 
 #include <sstream>
 #include <fstream>
+
+SOCKET gListenSocket = INVALID_SOCKET;
+
+bool InitLuxSocket()
+{
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
+        Log("WSAStartup failed\n");
+        return false;
+    }
+
+    gListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (gListenSocket == INVALID_SOCKET)
+    {
+        Log("Socket creation failed\n");
+        WSACleanup();
+        return false;
+    }
+
+	u_long nonBlocking = 1;
+	ioctlsocket(gListenSocket, FIONBIO, &nonBlocking);
+
+    sockaddr_in service;
+    service.sin_family = AF_INET;
+    service.sin_addr.s_addr = inet_addr("127.0.0.1");
+    service.sin_port = htons(5150);
+
+    if (bind(gListenSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
+    {
+        Log("Bind failed\n");
+        closesocket(gListenSocket);
+        WSACleanup();
+        return false;
+    }
+
+    if (listen(gListenSocket, SOMAXCONN) == SOCKET_ERROR)
+    {
+        Log("Listen failed\n");
+        closesocket(gListenSocket);
+        WSACleanup();
+        return false;
+    }
+
+    Log("Socket listening on 127.0.0.1:5150\n");
+	if (gListenSocket == INVALID_SOCKET)
+    Log("Socket never initialized properly!\n");
+
+    return true;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // DISSOLVE ENTITIES
@@ -91,6 +142,7 @@ cLuxMap::cLuxMap(const tString& asName)
 	mbCommentaryIconsActive = false;
 
 	mfDotnetTime = 0.0f;
+	InitLuxSocket();
 }
 
 //-----------------------------------------------------------------------
@@ -399,34 +451,29 @@ void cLuxMap::Update(float afTimeStep)
 
 	UpdateLampLightConnections(afTimeStep);
 
-	if(mfDotnetTime > 0.2f)
+	SOCKET clientSocket;
+	sockaddr_in clientAddr;
+	int addrLen = sizeof(clientAddr);
+
+	clientSocket = accept(gListenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+	if (clientSocket != INVALID_SOCKET)
 	{
-		mfDotnetTime = 0.0f;
-	
-		ifstream LockFile("lock");
-		ifstream MyReadFile("commands");
+		Log("Client connected!\n");
 
-		if(!LockFile.good() && MyReadFile.good())
-		{
-			LockFile.close();
-			string command;
+		// Optional: send welcome
+		const char* msg = "Welcome to Streamnesia!\n";
+		send(clientSocket, msg, (int)strlen(msg), 0);
 
-			while (getline (MyReadFile, command)) {
-				this->RunScript(command);
-			}
-
-			MyReadFile.close();
-			remove("commands");
-		}
-		else
-		{
-			LockFile.close();
-			MyReadFile.close();
-		}
+		// Optional: keep this socket around if you want to handle it later
+		closesocket(clientSocket); // for now just close it
 	}
 	else
 	{
-		mfDotnetTime += afTimeStep;
+		int err = WSAGetLastError();
+		if (err != WSAEWOULDBLOCK)
+		{
+			Log("Accept error: %d\n", err);
+		}
 	}
 }
 

@@ -255,6 +255,7 @@
     <ClInclude Include="LuxIdleBehavior_ManPig.h" />
     <ClInclude Include="LuxMainMenu_StartGame.h" />
     <ClInclude Include="LuxTypes.h" />
+    <ClInclude Include="LuxWinSocketInit.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="LuxKeyEntry.h" />
     <ClInclude Include="LuxArea.h" />
