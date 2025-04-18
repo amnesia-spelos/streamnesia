@@ -6,7 +6,7 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Streamnesia.Twitch
 {
@@ -27,14 +27,14 @@ namespace Streamnesia.Twitch
         {
             if (!File.Exists(BotConfigFile))
             {
-                File.WriteAllText(BotConfigFile, JsonConvert.SerializeObject(new BotConfig()));
+                File.WriteAllText(BotConfigFile, JsonSerializer.Serialize(new BotConfig()));
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"Please fill your {BotConfigFile} in the streamnesia directory.");
                 Console.ResetColor();
                 throw new Exception("Config file was not found");
             }
 
-            var config = JsonConvert.DeserializeObject<BotConfig>(File.ReadAllText(BotConfigFile));
+            var config = JsonSerializer.Deserialize<BotConfig>(File.ReadAllText(BotConfigFile));
 
             if (config.BotApiKey == "YOUR-API-KEY-HERE")
             {

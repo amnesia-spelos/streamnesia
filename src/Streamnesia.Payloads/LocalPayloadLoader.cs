@@ -4,8 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Streamnesia.Payloads.Entities;
 
 namespace Streamnesia.Payloads
@@ -52,12 +52,12 @@ namespace Streamnesia.Payloads
                 }
 
                 var json = File.ReadAllText(Path.Combine(PayloadsDirectory, "payloads.json"));
-                payloadDefinitions = JsonConvert.DeserializeObject<IEnumerable<PayloadModel>>(json);
+                payloadDefinitions = JsonSerializer.Deserialize<IEnumerable<PayloadModel>>(json);
             }
 
             if(File.Exists(_config.CustomPayloadsFile))
             {
-                var customPayloads = JsonConvert.DeserializeObject<IEnumerable<PayloadModel>>(File.ReadAllText(_config.CustomPayloadsFile));
+                var customPayloads = JsonSerializer.Deserialize<IEnumerable<PayloadModel>>(File.ReadAllText(_config.CustomPayloadsFile));
                 payloadDefinitions = payloadDefinitions.Concat(customPayloads);
             }
 
@@ -91,7 +91,7 @@ namespace Streamnesia.Payloads
 
         private static void UpdatePayloads()
         {
-            const string PayloadsUrl = "https://github.com/petrspelos/streamnesia-payloads/archive/main.zip";
+            const string PayloadsUrl = "https://github.com/amnesia-spelos/streamnesia-payloads/archive/main.zip";
 
             using (var client = new WebClient())
             {
