@@ -1,5 +1,3 @@
-using System;
-
 namespace Streamnesia.Payloads.Entities
 {
     internal class PayloadModel
