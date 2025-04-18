@@ -46,6 +46,7 @@
 #include <fstream>
 
 SOCKET gListenSocket = INVALID_SOCKET;
+SOCKET gClientSocket = INVALID_SOCKET;
 
 bool InitLuxSocket()
 {
@@ -451,28 +452,79 @@ void cLuxMap::Update(float afTimeStep)
 
 	UpdateLampLightConnections(afTimeStep);
 
-	SOCKET clientSocket;
-	sockaddr_in clientAddr;
-	int addrLen = sizeof(clientAddr);
-
-	clientSocket = accept(gListenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-	if (clientSocket != INVALID_SOCKET)
+	if (gClientSocket == INVALID_SOCKET)
 	{
-		Log("Client connected!\n");
+		SOCKET clientSocket;
+		sockaddr_in clientAddr;
+		int addrLen = sizeof(clientAddr);
 
-		// Optional: send welcome
-		const char* msg = "Welcome to Streamnesia!\n";
-		send(clientSocket, msg, (int)strlen(msg), 0);
-
-		// Optional: keep this socket around if you want to handle it later
-		closesocket(clientSocket); // for now just close it
-	}
-	else
-	{
-		int err = WSAGetLastError();
-		if (err != WSAEWOULDBLOCK)
+		clientSocket = accept(gListenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+		if (clientSocket != INVALID_SOCKET)
 		{
-			Log("Accept error: %d\n", err);
+			Log("Client connected!\n");
+			gClientSocket = clientSocket;
+
+			const char* msg = "Hello, from Amnesia: The Dark Descent!\n";
+			send(clientSocket, msg, (int)strlen(msg), 0);
+		}
+		else
+		{
+			int err = WSAGetLastError();
+			if (err != WSAEWOULDBLOCK)
+			{
+				Log("Accept error: %d\n", err);
+			}
+		}
+	}
+
+	if (gClientSocket != INVALID_SOCKET)
+	{
+		char buffer[1024];
+		int bytesReceived = recv(gClientSocket, buffer, sizeof(buffer) - 1, 0);
+
+		if (bytesReceived > 0)
+		{
+			buffer[bytesReceived] = '\0'; // Null terminate
+			for (int i = 0; buffer[i]; ++i)
+			{
+				if (buffer[i] == '\r' || buffer[i] == '\n')
+				{
+					buffer[i] = '\0';
+					break;
+				}
+			}
+
+			Log("Client says: %s\n", buffer);
+
+			// Handle known command
+			if (strcmp(buffer, "getpos") == 0)
+			{
+				cVector3f vPos = gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition();
+				char response[128];
+				sprintf(response, "PlayerFeet: %.2f, %.2f, %.2f\n", vPos.x, vPos.y, vPos.z);
+				send(gClientSocket, response, (int)strlen(response), 0);
+			}
+			else if (strcmp(buffer, "ping") == 0)
+			{
+				const char* pong = "pong\n";
+				send(gClientSocket, pong, (int)strlen(pong), 0);
+			}
+			else if (strncmp(buffer, "exec:", 5) == 0)
+			{
+				const char* script = buffer + 5; // Skip "exec:"
+				RunScript(script);
+				send(gClientSocket, "Script executed\n", 16, 0);
+			}
+			else
+			{
+				send(gClientSocket, "Unknown command\n", 16, 0);
+			}
+		}
+		else if (bytesReceived == 0 || (bytesReceived == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK))
+		{
+			Log("Client disconnected.\n");
+			closesocket(gClientSocket);
+			gClientSocket = INVALID_SOCKET;
 		}
 	}
 }

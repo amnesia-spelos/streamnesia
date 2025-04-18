@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Streamnesia.CommandProcessing;
 using Streamnesia.Payloads;
 using Streamnesia.Twitch;
@@ -20,7 +21,7 @@ namespace Streamnesia.WebApp
         private readonly Bot _bot;
         private readonly Random _rng;
         private readonly PollState _pollState;
-        private readonly IServerLogger _logger;
+        private readonly ILogger<StreamnesiaHub> _logger;
 
         private IEnumerable<Payload> _payloads;
         private bool _canQueryPoll;
@@ -34,7 +35,7 @@ namespace Streamnesia.WebApp
             Random rng,
             PollState pollState,
             StreamnesiaConfig config,
-            IServerLogger logger
+            ILogger<StreamnesiaHub> logger
         )
         {
             _hub = hub;
@@ -49,13 +50,13 @@ namespace Streamnesia.WebApp
             _canQueryPoll = true;
 
             _bot.OnVoted = OnUserVoted;
-            _bot.OnDeathSet = text => {
+            _bot.OnDeathSet = async text => {
                 if(config.AllowDeathMessages)
-                    Amnesia.SetDeathHintTextAsync(text);
+                    await _cmdQueue.Amnesia.SetDeathHintTextAsync(text);
             };
-            _bot.OnMessageSent = text => {
+            _bot.OnMessageSent = async text => {
                 if(config.AllowOnScreenMessages)
-                    Amnesia.DisplayTextAsync(text);
+                    await _cmdQueue.Amnesia.DisplayTextAsync(text);
             };
 
             _ = _cmdQueue.StartCommandProcessingAsync(CancellationToken.None);
@@ -64,7 +65,11 @@ namespace Streamnesia.WebApp
 
         public async Task StartLoop()
         {
-            _logger.Log("Starting the loop");
+            _logger.LogInformation("Starting the loop");
+
+            await _cmdQueue.Amnesia.AttachToGameAsync();
+            _logger.LogInformation("Attached to game");
+
             _payloads = await _payloadLoader.GetPayloadsAsync();
             _poll.SetPayloadSource(_payloads);
 
@@ -138,7 +143,7 @@ namespace Streamnesia.WebApp
 
         private async Task SendCurrentStatusAsync(double percentage, IEnumerable<PollOption> options, bool isRapidMode)
         {
-            _logger.Log($"Sending {percentage}% update");
+            _logger.LogInformation($"Sending {percentage}% update");
             await _hub.Clients.All.SendCoreAsync("UpdateTimePercentage", new object[] { new {
                 percentage,
                 options = options.Select(p => new {
@@ -152,7 +157,7 @@ namespace Streamnesia.WebApp
 
         private async Task SendClearStatusAsync()
         {
-            _logger.Log($"Sending clear update");
+            _logger.LogInformation($"Sending clear update");
             await _hub.Clients.All.SendCoreAsync("UpdateTimePercentage", new object[] { new {
                 percentage = 100.0,
                 options = new object[0],

@@ -50,10 +50,10 @@ namespace Streamnesia.ConsoleApp
                     CommandQueue.AddPayload(p);
                 };
                 bot.OnMessageSent = async msg => {
-                    await Amnesia.DisplayTextAsync(msg);
+                    await CommandQueue.Amnesia.DisplayTextAsync(msg);
                 };
-                bot.OnDeathSet = msg => {
-                    Amnesia.SetDeathHintTextAsync(msg);
+                bot.OnDeathSet = async msg => {
+                    await CommandQueue.Amnesia.SetDeathHintTextAsync(msg);
                 };
             }
             else if(args.Length == 2 && args[0] == "--run")
