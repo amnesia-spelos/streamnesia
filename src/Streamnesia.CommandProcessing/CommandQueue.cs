@@ -11,15 +11,30 @@ namespace Streamnesia.CommandProcessing
     {
         private ConcurrentQueue<Payload> _payloadQueue = new ConcurrentQueue<Payload>();
         private ConcurrentQueue<TimedInstruction> _instructionQueue = new ConcurrentQueue<TimedInstruction>();
+        public AmnesiaClient Amnesia { get; private set; } = new(new Random());
+        private bool _initialized = false;
 
         public async Task StartCommandProcessingAsync(CancellationToken cancellationToken)
         {
+            try
+            {
+                await Amnesia.AttachToGameAsync();
+                _initialized = true;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("ERROR: Failed to attach to game");
+                throw;
+            }
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 ProcessCommandQueue();
                 await ProcessInstructionQueue();
-                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
+                await Task.Delay(1, cancellationToken);
             }
+
+            Amnesia.Dispose();
         }
 
         public void AddPayload(Payload payload)
@@ -36,10 +51,7 @@ namespace Streamnesia.CommandProcessing
 
         private void ProcessCommandQueue()
         {
-            if (_payloadQueue.Count == 0)
-                return;
-
-            if (!Amnesia.LastInstructionWasExecuted())
+            if (!_initialized || _payloadQueue.Count == 0)
                 return;
 
             if(_payloadQueue.TryDequeue(out var payload) == false)
@@ -53,9 +65,6 @@ namespace Streamnesia.CommandProcessing
 
         private async Task ProcessInstructionQueue()
         {
-            if(!Amnesia.LastInstructionWasExecuted())
-                return;
-            
             TimedInstruction extension;
 
             for(var i = 0; i < _instructionQueue.Count; i++)
@@ -68,6 +77,7 @@ namespace Streamnesia.CommandProcessing
 
                 if(DateTime.Now >= extension.ExecuteAfterDateTime)
                 {
+                    Console.WriteLine($"Sending code: {extension.Angelcode}");
                     await Amnesia.ExecuteAsync(extension.Angelcode);
                     return;
                 }

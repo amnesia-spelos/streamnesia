@@ -40,9 +40,6 @@ namespace Streamnesia.WebApp
 
                 if(DateTime.Now < _cooldownEnd)
                     return;
-                
-                if (PreventStacking())
-                    return;
 
                 _cooldownEnd = null;
                 Cooldown = false;
@@ -62,18 +59,6 @@ namespace Streamnesia.WebApp
 
                 ShouldRegenerate = true;
             }
-        }
-
-        private bool PreventStacking()
-        {
-            if(!Amnesia.LastInstructionWasExecuted())
-            {
-                Cooldown = true;
-                _cooldownEnd = DateTime.Now.Add(TimeSpan.FromSeconds(1));
-                return true;
-            }
-
-            return false;
         }
 
         private bool ShouldStartRapidfire() => IsRapidfire || _rapidfireChancePrecent == 0 ? false : _rng.Next(100) + 1 <= _rapidfireChancePrecent;
