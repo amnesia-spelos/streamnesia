@@ -15,7 +15,6 @@ namespace Streamnesia.Execution;
 public partial class AmnesiaClient(
     TcpClient client,
     IAmnesiaClientConfig config,
-    ICommandPreprocessor preprocessor,
     ILogger<AmnesiaClient> logger
     ) : IAmnesiaClient
 {
@@ -56,8 +55,6 @@ public partial class AmnesiaClient(
 
     public async Task<Result> ExecuteCommandAsync(string command, CancellationToken cancellationToken = default)
     {
-        command = preprocessor.PreprocessCommand(command);
-
         logger.LogDebug("Sending command to execute: '{command}'", command);
 
         _stopwatch.Restart();

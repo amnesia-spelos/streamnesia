@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Streamnesia.Client.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,5 +25,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-
-app.Run();
+await app.RunAsync();
