@@ -64,6 +64,8 @@ class cLuxMainMenu;
 
 class cLuxPlayer;
 
+class cLuxSocketServer;
+
 
 //----------------------------------------------
 
@@ -241,6 +243,8 @@ public:
 	cLuxCredits *mpCredits;
 	cLuxDemoEnd* mpDemoEnd;
 	iLuxAchievementHandler* mpAchievementHandler;
+
+	cLuxSocketServer* mpSocketServer;
 
 	tString msGameName;
 	tWString msErrorMessage;
