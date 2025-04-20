@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Streamnesia.Core;
-using Streamnesia.Core.Configuration;
 
 namespace Streamnesia.Execution;
 
 public partial class AmnesiaClient(
     TcpClient client,
-    IAmnesiaClientConfig config,
+    IConfigurationStorage configStorage,
     ILogger<AmnesiaClient> logger
     ) : IAmnesiaClient
 {
@@ -34,6 +33,8 @@ public partial class AmnesiaClient(
             logger.LogWarning("The game client is already connected and won't be re-initialized.");
             return Result.Fail("The game client is already connected!");
         }
+
+        var config = configStorage.ReadAmnesiaClientConfig();
 
         client.Connect(config.Host, config.Port);
         _stream = client.GetStream();

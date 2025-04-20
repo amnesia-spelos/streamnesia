@@ -1,11 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Streamnesia.CommandProcessing\Streamnesia.Execution.csproj" />
-    <ProjectReference Include="..\Streamnesia.Payloads\Streamnesia.Payloads.csproj" />
-    <ProjectReference Include="..\Streamnesia.Twitch\Streamnesia.Twitch.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>

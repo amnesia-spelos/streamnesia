@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Streamnesia.Client.Models;
+using Streamnesia.Core;
 
 namespace Streamnesia.Client.Controllers;
 
-public class HomeController : Controller
+public class HomeController(IConfigurationStorage cfgStorage) : Controller
 {
     public IActionResult Index()
     {
@@ -14,7 +15,11 @@ public class HomeController : Controller
     [HttpGet("/settings")]
     public IActionResult Settings()
     {
-        return View();
+        return View(new SettingsModel
+        {
+            AmnesiaClientConfig = cfgStorage.ReadAmnesiaClientConfig(),
+            TwitchBotConfig = cfgStorage.ReadTwitchBotConfig(),
+        });
     }
 
     [HttpGet("/overlay")]
@@ -27,5 +32,18 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    [HttpPost("/settings")]
+    public IActionResult SaveSettings(SettingsModel model)
+    {
+        if (!ModelState.IsValid)
+            return View("Settings", model);
+
+        cfgStorage.WriteAmnesiaClientConfig(model.AmnesiaClientConfig);
+        cfgStorage.WriteTwitchBotConfig(model.TwitchBotConfig);
+
+        TempData["SuccessMessage"] = "Settings saved successfully!";
+        return RedirectToAction("Settings");
     }
 }

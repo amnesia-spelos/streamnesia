@@ -1,10 +1,11 @@
-using System.Diagnostics;
 using Streamnesia.Client.Extensions;
+using Streamnesia.Client.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 builder.Services.AddStreamnesiaDependencies(builder.Configuration);
 
 var app = builder.Build();
@@ -19,6 +20,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+app.MapHub<SettingsHub>("/settingshub");
 
 app.MapControllerRoute(
     name: "default",

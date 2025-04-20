@@ -1,12 +1,15 @@
-﻿using Streamnesia.Core.Configuration;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Streamnesia.Client.Options;
+namespace Streamnesia.Core.Configuration;
 
-public class TwitchBotConfig : ITwitchBotConfig
+public class TwitchBotConfig
 {
+    [Required]
     public string BotApiKey { get; set; } = string.Empty;
 
+    [Required]
     public string BotName { get; set; } = string.Empty;
 
+    [Required]
     public string TwitchChannelName { get; set; } = string.Empty;
 }

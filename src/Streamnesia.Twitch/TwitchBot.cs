@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Streamnesia.Core;
-using Streamnesia.Core.Configuration;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -15,7 +14,7 @@ namespace Streamnesia.Twitch;
 
 public class TwitchBot : ITwitchBot
 {
-    private readonly ITwitchBotConfig _config;
+    private readonly IConfigurationStorage _configStorage;
     private readonly ILogger<TwitchBot> _logger;
 
     private TwitchClient _client;
@@ -24,9 +23,9 @@ public class TwitchBot : ITwitchBot
 
     public bool IsConnected => _client.IsConnected;
 
-    public TwitchBot(ITwitchBotConfig config, ILogger<TwitchBot> logger)
+    public TwitchBot(IConfigurationStorage configStorage, ILogger<TwitchBot> logger)
     {
-        _config = config;
+        _configStorage = configStorage;
         _logger = logger;
 
         _client.OnJoinedChannel += Client_OnJoinedChannel;
@@ -50,9 +49,11 @@ public class TwitchBot : ITwitchBot
             return Task.FromResult(Result.Fail("The client is already connected."));
         }
 
+        var config = _configStorage.ReadTwitchBotConfig();
+
         try
         {
-            var credentials = new ConnectionCredentials(_config.BotName, _config.BotApiKey);
+            var credentials = new ConnectionCredentials(config.BotName, config.BotApiKey);
             var clientOptions = new ClientOptions
             {
                 MessagesAllowedInPeriod = 750,
@@ -61,7 +62,7 @@ public class TwitchBot : ITwitchBot
 
             var customClient = new WebSocketClient(clientOptions);
             _client = new TwitchClient(customClient);
-            _client.Initialize(credentials, _config.TwitchChannelName);
+            _client.Initialize(credentials, config.TwitchChannelName);
             _client.Connect();
         }
         catch (Exception e)

@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Streamnesia.Configuration\Streamnesia.Configuration.csproj" />
     <ProjectReference Include="..\Streamnesia.Core\Streamnesia.Core.csproj" />
     <ProjectReference Include="..\Streamnesia.Execution\Streamnesia.Execution.csproj" />
     <ProjectReference Include="..\Streamnesia.Twitch\Streamnesia.Twitch.csproj" />
