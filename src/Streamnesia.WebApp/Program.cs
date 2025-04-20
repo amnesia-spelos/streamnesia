@@ -10,6 +10,7 @@ using Streamnesia.WebApp.Hubs;
 using Streamnesia.WebApp;
 using Newtonsoft.Json;
 using System.IO;
+using Streamnesia.Core;
 
 const string StreamnesiaConfigFile = "streamnesia-config.json";
 
@@ -26,7 +27,7 @@ builder.Services.AddSingleton<Random>();
 builder.Services.AddSingleton<ICommandPoll, CommandPoll>();
 builder.Services.AddSingleton<CommandQueue>();
 builder.Services.AddSingleton<IPayloadLoader, LocalPayloadLoader>();
-builder.Services.AddSingleton<Bot>();
+builder.Services.AddSingleton<TwitchBot>();
 builder.Services.AddSingleton<PollState>();
 
 builder.Services.AddControllersWithViews();

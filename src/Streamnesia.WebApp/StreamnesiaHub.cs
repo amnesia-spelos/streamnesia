@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using Streamnesia.CommandProcessing;
+using Streamnesia.Core;
 using Streamnesia.Payloads;
 using Streamnesia.Twitch;
 using Streamnesia.WebApp.Hubs;
@@ -18,7 +18,7 @@ namespace Streamnesia.WebApp
         private readonly ICommandPoll _poll;
         private readonly CommandQueue _cmdQueue;
         private readonly IPayloadLoader _payloadLoader;
-        private readonly Bot _bot;
+        private readonly TwitchBot _bot;
         private readonly Random _rng;
         private readonly PollState _pollState;
         private readonly ILogger<StreamnesiaHub> _logger;
@@ -31,7 +31,7 @@ namespace Streamnesia.WebApp
             ICommandPoll poll,
             CommandQueue cmdQueue,
             IPayloadLoader payloadLoader,
-            Bot bot,
+            TwitchBot bot,
             Random rng,
             PollState pollState,
             StreamnesiaConfig config,
