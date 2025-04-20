@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddStreamnesiaDependencies(builder.Configuration);
+builder.Services.AddSingleton<AmnesiaClientEventDispatcher>();
 
 var app = builder.Build();
 
@@ -20,11 +21,14 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
-app.MapHub<SettingsHub>("/settingshub");
+app.MapHub<StatusHub>("/statushub");
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+// ensuring this gets activated on startup
+app.Services.GetRequiredService<AmnesiaClientEventDispatcher>();
 
 await app.RunAsync();

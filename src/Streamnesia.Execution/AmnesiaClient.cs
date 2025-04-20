@@ -26,32 +26,91 @@ public partial class AmnesiaClient(
 
     public bool IsConnected => client.Connected;
 
-    public async Task<Result> ConnectAsync(CancellationToken cancellationToken = default)
+    public event AsyncStateChangedHandler StateChangedAsync;
+
+    private AmnesiaClientState _state;
+    public AmnesiaClientState State
+    {
+        get => _state;
+        private set
+        {
+            if (_state != value)
+            {
+                _state = value;
+                _ = RaiseStateChangedAsync(_state);
+            }
+        }
+    }
+
+    private async Task RaiseStateChangedAsync(AmnesiaClientState newState)
+    {
+        if (StateChangedAsync == null) return;
+
+        foreach (var handler in StateChangedAsync.GetInvocationList())
+        {
+            try
+            {
+                await ((AsyncStateChangedHandler)handler)(this, newState);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Failed to raise state changed event");
+            }
+        }
+    }
+
+    public Task<Result> ConnectAsync(CancellationToken cancellationToken = default)
     {
         if (client.Connected)
         {
             logger.LogWarning("The game client is already connected and won't be re-initialized.");
-            return Result.Fail("The game client is already connected!");
+            return Task.FromResult(Result.Fail("The game client is already connected!"));
         }
 
-        var config = configStorage.ReadAmnesiaClientConfig();
+        State = AmnesiaClientState.Connecting;
 
-        client.Connect(config.Host, config.Port);
+        var config = configStorage.ReadAmnesiaClientConfig();
+        client.Connect(config.Host, config.Port); // FIXME: will throw if the game is not up, therefore, this must be retry-able
         _stream = client.GetStream();
         _writer = new StreamWriter(_stream, Encoding.ASCII) { AutoFlush = true };
         _reader = new StreamReader(_stream, Encoding.ASCII);
 
-        logger.LogInformation("Waiting for the game to respond...");
-        string welcome = await _reader.ReadLineAsync(); // TODO: Cancellation token + retry policy?
+        _ = Task.Run(() => WaitForWelcomeMessageAsync(cancellationToken), CancellationToken.None);
 
-        if (!welcome.StartsWith("Hello, from Amnesia: The Dark Descent!"))
+        return Task.FromResult(Result.Ok());
+    }
+
+    private async Task WaitForWelcomeMessageAsync(CancellationToken cancellationToken)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(TimeSpan.FromMinutes(5));
+
+        try
         {
-            logger.LogError("The game server returned an unexpected welcome message: {Message}", welcome);
-            return Result.Fail($"Unexpected welcome message: '{welcome}'");
-        }
+            logger.LogInformation("Waiting for the game to respond...");
+            var welcome = await _reader.ReadLineAsync(cts.Token);
 
-        logger.LogInformation("Game communication established.");
-        return Result.Ok();
+            if (welcome != null && welcome.StartsWith("Hello, from Amnesia: The Dark Descent!"))
+            {
+                State = AmnesiaClientState.Connected;
+                logger.LogInformation("Game communication established.");
+            }
+            else
+            {
+                State = AmnesiaClientState.Failed;
+                logger.LogError("Unexpected welcome message: {Message}", welcome);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            State = AmnesiaClientState.Failed;
+            logger.LogError("Connection timed out waiting for welcome message.");
+        }
+        catch (Exception ex)
+        {
+            State = AmnesiaClientState.Failed;
+            logger.LogError(ex, "Failed to receive welcome message.");
+        }
     }
 
     public async Task<Result> ExecuteCommandAsync(string command, CancellationToken cancellationToken = default)

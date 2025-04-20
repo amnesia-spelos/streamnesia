@@ -1,9 +1,78 @@
-﻿<div class="container">
+﻿@model IndexViewModel
+
+<div class="container">
     <main role="main" class="pb-3">
         <div class="text-center">
             <img src="~/img/tada-spelos.webp" width="350" height="350" />
             <h1 class="display-4">Welcome to Streamnesia 3.0</h1>
             <p>The next generation of the crazy chaos mod you know and love!</p>
         </div>
+        <div class="container py-4">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="card border">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Amnesia Game Client</h6>
+                                <small class="text-muted">Not running</small>
+                            </div>
+                            <button class="btn btn-outline-dark btn-sm">Start</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Twitch Bot</h6>
+                                <small class="text-muted">Not running</small>
+                            </div>
+                            <button class="btn btn-outline-dark btn-sm">Start</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 </div>
+
+@section Scripts
+{
+    <script>
+        const connection = new signalR.HubConnectionBuilder().withUrl("/statushub").build();
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        const amnesiaStatus = "@Model.CurrentAmnesiaClientState";
+
+        console.log("Amnesia Client Status:", amnesiaStatus);
+
+        // TODO: Block until SignalR connects
+
+        // document.getElementById("sendButton").disabled = true;
+
+        connection.on("AmnesiaClientStateChanged", function (newState) {
+            console.log("SignalR: AmnesiaClientState:", newState);
+        });
+
+        function startClient() {
+            connection.invoke("StartAmnesiaClient").catch(function (err) {
+                return console.error(err.toString());
+            });
+        }
+
+
+
+        // document.getElementById("sendButton").addEventListener("click", function (event) {
+        //     var message = document.getElementById("messageInput").value;
+        //     connection.invoke("Echo", message).catch(function (err) {
+        //         return console.error(err.toString());
+        //     });
+        //     event.preventDefault();
+        // });
+    </script>
+}

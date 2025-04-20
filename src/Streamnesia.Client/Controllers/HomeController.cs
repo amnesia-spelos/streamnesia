@@ -5,11 +5,14 @@ using Streamnesia.Core;
 
 namespace Streamnesia.Client.Controllers;
 
-public class HomeController(IConfigurationStorage cfgStorage) : Controller
+public class HomeController(IConfigurationStorage cfgStorage, IAmnesiaClient amnesiaClient) : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        return View(new IndexViewModel
+        {
+            CurrentAmnesiaClientState = amnesiaClient.State
+        });
     }
 
     [HttpGet("/settings")]
