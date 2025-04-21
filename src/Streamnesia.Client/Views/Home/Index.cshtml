@@ -59,10 +59,21 @@
             event.preventDefault();
         }
 
+        function onAmnesiaDisconnectPressed(event) {
+            amnesiaStopButton.disabled = true;
+            stopClient();
+            event.preventDefault();
+        }
+
         const amnesiaStartButton = document.createElement('button');
         amnesiaStartButton.classList.add('btn', 'btn-outline-success', 'btn-sm', 'd-block');
         amnesiaStartButton.innerText = 'Connect';
         amnesiaStartButton.addEventListener('click', onAmnesiaConnectPressed);
+
+        const amnesiaStopButton = document.createElement('button');
+        amnesiaStopButton.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'd-block');
+        amnesiaStopButton.innerText = 'Disconnect';
+        amnesiaStopButton.addEventListener('click', onAmnesiaDisconnectPressed);
 
         const amnesiaWarningText = document.createElement('small');
         amnesiaWarningText.classList.add('text-warning');
@@ -87,6 +98,12 @@
             });
         }
 
+        function stopClient() {
+            connection.invoke("StopAmnesiaClient").catch(function (err) {
+                return console.error(err.toString());
+            });
+        }
+
         function setAmnesiaTileState(state, message) {
             console.log("Amnesia client state: ", state);
 
@@ -106,7 +123,9 @@
             else if (state === 'Connected') {
                 amnesiaTileCircle.className = CircleStyleGreen;
                 amnesiaTileDesc.innerText = 'Connected';
-                amnesiaTileActionsDiv.replaceChildren();
+
+                amnesiaStopButton.disabled = false;
+                amnesiaTileActionsDiv.replaceChildren(amnesiaStopButton);
             }
             else if (state === 'Failed') {
                 amnesiaTileCircle.className = CircleStyleRed;

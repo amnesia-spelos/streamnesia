@@ -13,4 +13,6 @@ public class StatusHub : Hub
     }
 
     public Task StartAmnesiaClient() => _amnesiaClient.ConnectAsync();
+
+    public Task StopAmnesiaClient() => _amnesiaClient.Disconnect();
 }

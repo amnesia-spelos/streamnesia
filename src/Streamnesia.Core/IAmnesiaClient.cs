@@ -23,4 +23,6 @@ public interface IAmnesiaClient : IDisposable
     public Task<Result> ConnectAsync(CancellationToken cancellationToken = default);
 
     public Task<Result> ExecuteCommandAsync(string command, CancellationToken cancellationToken = default);
+
+    public Task Disconnect(CancellationToken cancellationToken = default);
 }

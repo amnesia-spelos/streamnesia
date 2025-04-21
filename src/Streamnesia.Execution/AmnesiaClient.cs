@@ -214,4 +214,17 @@ public partial class AmnesiaClient(
 
         GC.SuppressFinalize(this);
     }
+
+    public Task Disconnect(CancellationToken cancellationToken = default)
+    {
+        if (client.Connected)
+        {
+            logger.LogInformation("Client disconnected");
+            client.Close();
+            client = new TcpClient(); // FIXME: Perhaps get service collection and request a new one?
+            State = AmnesiaClientState.Disconnected;
+        }
+
+        return Task.CompletedTask;
+    }
 }
