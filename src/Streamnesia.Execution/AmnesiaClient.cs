@@ -29,6 +29,9 @@ public partial class AmnesiaClient(
 
     public event AsyncStateChangedHandler StateChangedAsync;
 
+    // FIXME: There is definitely a better way to return errors to the UI
+    private string _errorMessage = string.Empty;
+
     private AmnesiaClientState _state;
     public AmnesiaClientState State
     {
@@ -51,7 +54,8 @@ public partial class AmnesiaClient(
         {
             try
             {
-                await ((AsyncStateChangedHandler)handler)(this, newState);
+                await ((AsyncStateChangedHandler)handler)(this, newState, _errorMessage);
+                _errorMessage = string.Empty;
             }
             catch (Exception e)
             {
@@ -60,7 +64,6 @@ public partial class AmnesiaClient(
         }
     }
 
-    private readonly ConcurrentQueue<string> _eventQueue = new();
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingResponses = new();
 
     private async Task ListenLoopAsync(CancellationToken cancellationToken)
@@ -74,7 +77,6 @@ public partial class AmnesiaClient(
 
                 if (line.StartsWith("EVENT:"))
                 {
-                    _eventQueue.Enqueue(line);
                     logger.LogInformation("[Game Event] {event}", line.Substring(6));
                 }
                 else if (line.StartsWith("RESPONSE:"))
@@ -116,11 +118,21 @@ public partial class AmnesiaClient(
         State = AmnesiaClientState.Connecting;
 
         var config = configStorage.ReadAmnesiaClientConfig();
-        client.Connect(config.Host, config.Port); // FIXME: will throw if the game is not up, therefore, this must be retry-able
-        _stream = client.GetStream();
-        _writer = new StreamWriter(_stream, Encoding.ASCII) { AutoFlush = true };
-        _reader = new StreamReader(_stream, Encoding.ASCII);
 
+        try
+        {
+            client.Connect(config.Host, config.Port); // FIXME: will throw if the game is not up, therefore, this must be retry-able
+            _stream = client.GetStream();
+            _writer = new StreamWriter(_stream, Encoding.ASCII) { AutoFlush = true };
+            _reader = new StreamReader(_stream, Encoding.ASCII);
+        }
+        catch (SocketException e)
+        {
+            logger.LogError(e, "Failed to start up TCP client");
+            _errorMessage = "Failed to connect to the game. Is it running?";
+            State = AmnesiaClientState.Failed;
+            return Result.Fail(_errorMessage);
+        }
         await WaitForWelcomeMessageAsync(cancellationToken);
 
         _ = Task.Run(() => ListenLoopAsync(cancellationToken), CancellationToken.None);

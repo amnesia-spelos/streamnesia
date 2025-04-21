@@ -6,6 +6,8 @@
 cLuxSocketServer::cLuxSocketServer()
     : iLuxUpdateable("LuxSocketServer")
 {
+	mHost = "127.0.0.1";
+	mPort = 5150;
 	mListenSocket = INVALID_SOCKET;
     mClientSocket = INVALID_SOCKET;
 
@@ -35,8 +37,8 @@ bool cLuxSocketServer::InitSocket()
 
     sockaddr_in service;
     service.sin_family = AF_INET;
-    service.sin_addr.s_addr = inet_addr("127.0.0.1");
-    service.sin_port = htons(5150);
+	service.sin_addr.s_addr = inet_addr(mHost.c_str());
+	service.sin_port = htons(mPort);
 
     if (bind(mListenSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
     {
@@ -54,7 +56,7 @@ bool cLuxSocketServer::InitSocket()
         return false;
     }
 
-    Log("Socket listening on 127.0.0.1:5150\n");
+    Log("Socket listening on %s:%d\n", mHost.c_str(), mPort);
     return true;
 }
 
@@ -182,6 +184,16 @@ void cLuxSocketServer::SendMessage(const tString& message)
     {
         send(mClientSocket, message.c_str(), (int)message.length(), 0);
     }
+}
+
+void cLuxSocketServer::SetConnectionSettings(const tString& host, int port)
+{
+    mHost = host;
+    mPort = port;
+
+	Log("LuxSocketServer config changed: re-init\n");
+	ShutdownSocket();
+    InitSocket();
 }
 
 cLuxSocketServer::~cLuxSocketServer()

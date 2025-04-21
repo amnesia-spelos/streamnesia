@@ -16,12 +16,12 @@ public class AmnesiaClientEventDispatcher
         amnesiaClient.StateChangedAsync += OnAmnesiaClientStateChangedAsync;
     }
 
-    private async Task OnAmnesiaClientStateChangedAsync(object? sender, AmnesiaClientState state)
+    private async Task OnAmnesiaClientStateChangedAsync(object? sender, AmnesiaClientState state, string message)
     {
         try
         {
             _logger.LogInformation("Broadcasting AmnesiaClient state: {State}", state);
-            await _hubContext.Clients.All.SendAsync("AmnesiaClientStateChanged", state.ToString());
+            await _hubContext.Clients.All.SendAsync("AmnesiaClientStateChanged", state.ToString(), message);
         }
         catch (Exception ex)
         {

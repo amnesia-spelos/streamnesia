@@ -129,6 +129,9 @@ private:
 	cWidgetTab *mpTabGraphics;
 	cWidgetTab *mpTabInput;
 	cWidgetTab *mpTabSound;
+	cWidgetTab* mpTabStreamnesia;
+	cWidgetTextBox* mpTextBoxStreamHost;
+	cWidgetTextBox* mpTextBoxStreamPort;
 
 	cWidgetButton* mpBOK;
 	cWidgetButton* mpBCancel;

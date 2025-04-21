@@ -10,7 +10,7 @@ public enum AmnesiaClientState
     Failed
 }
 
-public delegate Task AsyncStateChangedHandler(object? sender, AmnesiaClientState newState);
+public delegate Task AsyncStateChangedHandler(object? sender, AmnesiaClientState newState, string message);
 
 public interface IAmnesiaClient : IDisposable
 {
