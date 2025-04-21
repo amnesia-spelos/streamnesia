@@ -8,7 +8,10 @@ public class AmnesiaClientEventDispatcher
     private readonly IHubContext<StatusHub> _hubContext;
     private readonly ILogger<AmnesiaClientEventDispatcher> _logger;
 
-    public AmnesiaClientEventDispatcher(IAmnesiaClient amnesiaClient, IHubContext<StatusHub> hubContext, ILogger<AmnesiaClientEventDispatcher> logger)
+    public AmnesiaClientEventDispatcher(
+        IAmnesiaClient amnesiaClient,
+        IHubContext<StatusHub> hubContext,
+        ILogger<AmnesiaClientEventDispatcher> logger)
     {
         _hubContext = hubContext;
         _logger = logger;
