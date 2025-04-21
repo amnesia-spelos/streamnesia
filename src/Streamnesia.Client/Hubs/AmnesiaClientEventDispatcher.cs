@@ -21,7 +21,7 @@ public class AmnesiaClientEventDispatcher
         try
         {
             _logger.LogInformation("Broadcasting AmnesiaClient state: {State}", state);
-            await _hubContext.Clients.All.SendAsync("AmnesiaClientStateChanged", state);
+            await _hubContext.Clients.All.SendAsync("AmnesiaClientStateChanged", state.ToString());
         }
         catch (Exception ex)
         {

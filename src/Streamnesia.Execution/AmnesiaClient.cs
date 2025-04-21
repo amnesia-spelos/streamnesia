@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -59,12 +60,57 @@ public partial class AmnesiaClient(
         }
     }
 
-    public Task<Result> ConnectAsync(CancellationToken cancellationToken = default)
+    private readonly ConcurrentQueue<string> _eventQueue = new();
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingResponses = new();
+
+    private async Task ListenLoopAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested && client.Connected)
+            {
+                var line = await _reader.ReadLineAsync(cancellationToken);
+                if (line == null) break; // disconnected
+
+                if (line.StartsWith("EVENT:"))
+                {
+                    _eventQueue.Enqueue(line);
+                    logger.LogInformation("[Game Event] {event}", line.Substring(6));
+                }
+                else if (line.StartsWith("RESPONSE:"))
+                {
+                    var parts = line.Split(':', 3); // RESPONSE:getmap:level01.map
+                    if (parts.Length >= 3 && _pendingResponses.TryRemove(parts[1], out var tcs))
+                    {
+                        tcs.SetResult(parts[2]);
+                    }
+                    else
+                    {
+                        logger.LogWarning("Unmatched response: {line}", line);
+                    }
+                }
+                else if (line.StartsWith("WARNING:"))
+                {
+                    logger.LogWarning("[Game Warning] {Warning}", line);
+                }
+                else
+                {
+                    logger.LogWarning("Unknown message format: {line}", line);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in socket listen loop.");
+        }
+    }
+
+    public async Task<Result> ConnectAsync(CancellationToken cancellationToken = default)
     {
         if (client.Connected)
         {
             logger.LogWarning("The game client is already connected and won't be re-initialized.");
-            return Task.FromResult(Result.Fail("The game client is already connected!"));
+            return Result.Fail("The game client is already connected!");
         }
 
         State = AmnesiaClientState.Connecting;
@@ -75,13 +121,15 @@ public partial class AmnesiaClient(
         _writer = new StreamWriter(_stream, Encoding.ASCII) { AutoFlush = true };
         _reader = new StreamReader(_stream, Encoding.ASCII);
 
-        _ = Task.Run(() => WaitForWelcomeMessageAsync(cancellationToken), CancellationToken.None);
+        await WaitForWelcomeMessageAsync(cancellationToken);
 
-        return Task.FromResult(Result.Ok());
+        _ = Task.Run(() => ListenLoopAsync(cancellationToken), CancellationToken.None);
+
+        return Result.Ok();
     }
 
     private async Task WaitForWelcomeMessageAsync(CancellationToken cancellationToken)
-    {
+    { 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromMinutes(5));
 
@@ -116,16 +164,35 @@ public partial class AmnesiaClient(
     public async Task<Result> ExecuteCommandAsync(string command, CancellationToken cancellationToken = default)
     {
         logger.LogDebug("Sending command to execute: '{command}'", command);
+        return await ExecuteRawAsync($"exec:{command}", cancellationToken);
+    }
 
+    public async Task<Result> ExecuteRawAsync(string rawInstruction, CancellationToken cancellationToken = default)
+    {
         _stopwatch.Restart();
 
-        _writer.Write($"exec:{command}");
-        var response = await _reader.ReadLineAsync();
+        string tag = rawInstruction.Split(':')[0]; // e.g., "getmap" or "exec"
+        var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _pendingResponses[tag] = tcs;
 
-        _stopwatch.Stop();
+        await _writer.WriteLineAsync(rawInstruction);
 
-        logger.LogInformation("Game Response: {response} - (took {ElapsedMilliseconds}ms)", response, _stopwatch.ElapsedMilliseconds);
-        return Result.Ok();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(TimeSpan.FromSeconds(10));
+
+        try
+        {
+            var response = await tcs.Task.WaitAsync(cts.Token);
+            _stopwatch.Stop();
+
+            logger.LogInformation("Game Response: {response} (in {ElapsedMilliseconds}ms)", response, _stopwatch.ElapsedMilliseconds);
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Timeout or error waiting for response to {tag}", tag);
+            return Result.Fail($"Timeout/error waiting for response: {tag}");
+        }
     }
 
     public void Dispose()

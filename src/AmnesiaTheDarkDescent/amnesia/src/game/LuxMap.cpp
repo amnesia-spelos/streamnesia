@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Amnesia: The Dark Descent.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "LuxWinSocketInit.h"
-
 #include "LuxMap.h"
 
 #include "LuxConfigHandler.h"
@@ -44,57 +42,6 @@
 
 #include <sstream>
 #include <fstream>
-
-SOCKET gListenSocket = INVALID_SOCKET;
-SOCKET gClientSocket = INVALID_SOCKET;
-
-bool InitLuxSocket()
-{
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-    {
-        Log("WSAStartup failed\n");
-        return false;
-    }
-
-    gListenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (gListenSocket == INVALID_SOCKET)
-    {
-        Log("Socket creation failed\n");
-        WSACleanup();
-        return false;
-    }
-
-	u_long nonBlocking = 1;
-	ioctlsocket(gListenSocket, FIONBIO, &nonBlocking);
-
-    sockaddr_in service;
-    service.sin_family = AF_INET;
-    service.sin_addr.s_addr = inet_addr("127.0.0.1");
-    service.sin_port = htons(5150);
-
-    if (bind(gListenSocket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
-    {
-        Log("Bind failed\n");
-        closesocket(gListenSocket);
-        WSACleanup();
-        return false;
-    }
-
-    if (listen(gListenSocket, SOMAXCONN) == SOCKET_ERROR)
-    {
-        Log("Listen failed\n");
-        closesocket(gListenSocket);
-        WSACleanup();
-        return false;
-    }
-
-    Log("Socket listening on 127.0.0.1:5150\n");
-	if (gListenSocket == INVALID_SOCKET)
-    Log("Socket never initialized properly!\n");
-
-    return true;
-}
 
 //////////////////////////////////////////////////////////////////////////
 // DISSOLVE ENTITIES
@@ -143,7 +90,6 @@ cLuxMap::cLuxMap(const tString& asName)
 	mbCommentaryIconsActive = false;
 
 	mfDotnetTime = 0.0f;
-	InitLuxSocket();
 }
 
 //-----------------------------------------------------------------------
@@ -451,82 +397,6 @@ void cLuxMap::Update(float afTimeStep)
 	UpdateToBeDesotroyedEntities(true);
 
 	UpdateLampLightConnections(afTimeStep);
-
-	if (gClientSocket == INVALID_SOCKET)
-	{
-		SOCKET clientSocket;
-		sockaddr_in clientAddr;
-		int addrLen = sizeof(clientAddr);
-
-		clientSocket = accept(gListenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-		if (clientSocket != INVALID_SOCKET)
-		{
-			Log("Client connected!\n");
-			gClientSocket = clientSocket;
-
-			const char* msg = "Hello, from Amnesia: The Dark Descent!\n";
-			send(clientSocket, msg, (int)strlen(msg), 0);
-		}
-		else
-		{
-			int err = WSAGetLastError();
-			if (err != WSAEWOULDBLOCK)
-			{
-				Log("Accept error: %d\n", err);
-			}
-		}
-	}
-
-	if (gClientSocket != INVALID_SOCKET)
-	{
-		char buffer[1024];
-		int bytesReceived = recv(gClientSocket, buffer, sizeof(buffer) - 1, 0);
-
-		if (bytesReceived > 0)
-		{
-			buffer[bytesReceived] = '\0'; // Null terminate
-			for (int i = 0; buffer[i]; ++i)
-			{
-				if (buffer[i] == '\r' || buffer[i] == '\n')
-				{
-					buffer[i] = '\0';
-					break;
-				}
-			}
-
-			Log("Client says: %s\n", buffer);
-
-			// Handle known command
-			if (strcmp(buffer, "getpos") == 0)
-			{
-				cVector3f vPos = gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition();
-				char response[128];
-				sprintf(response, "PlayerFeet: %.2f, %.2f, %.2f\n", vPos.x, vPos.y, vPos.z);
-				send(gClientSocket, response, (int)strlen(response), 0);
-			}
-			else if (strcmp(buffer, "ping") == 0)
-			{
-				const char* pong = "pong\n";
-				send(gClientSocket, pong, (int)strlen(pong), 0);
-			}
-			else if (strncmp(buffer, "exec:", 5) == 0)
-			{
-				const char* script = buffer + 5; // Skip "exec:"
-				RunScript(script);
-				send(gClientSocket, "Script executed\n", 16, 0);
-			}
-			else
-			{
-				send(gClientSocket, "Unknown command\n", 16, 0);
-			}
-		}
-		else if (bytesReceived == 0 || (bytesReceived == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK))
-		{
-			Log("Client disconnected.\n");
-			closesocket(gClientSocket);
-			gClientSocket = INVALID_SOCKET;
-		}
-	}
 }
 
 //-----------------------------------------------------------------------

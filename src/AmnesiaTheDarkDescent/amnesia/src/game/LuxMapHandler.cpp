@@ -30,6 +30,7 @@
 #include "LuxConfigHandler.h"
 #include "LuxLoadScreenHandler.h"
 #include "LuxMainMenu.h"
+#include "LuxSocketServer.h"
 
 #include "LuxEnemy.h"
 #include "LuxAchievementHandler.h"
@@ -434,6 +435,13 @@ void cLuxMapHandler::DestroyMap(cLuxMap* apMap, bool abLoadingSaveGame)
 void cLuxMapHandler::SetCurrentMap(cLuxMap* apMap, bool abRunScript, bool abFirstTime, const tString& asPlayerPos)
 {
 	if(mpCurrentMap == apMap) return;
+	
+	if (gpBase && gpBase->mpSocketServer && apMap)
+	{
+		tString mapFile = apMap->GetFileName();
+		tString message = "EVENT:MapChanged:" + mapFile + "\n";
+		gpBase->mpSocketServer->SendMessage(message);
+	}
 
 	//////////////////////////////////
 	//Unload stuff from previous map

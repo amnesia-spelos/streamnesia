@@ -11,6 +11,7 @@ public:
     ~cLuxSocketServer();
 
     void Update(float afTimeStep);
+	void SendMessage(const tString& message);
 private:
 	SOCKET mListenSocket;
 	SOCKET mClientSocket;

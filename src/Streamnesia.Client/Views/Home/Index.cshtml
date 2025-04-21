@@ -11,13 +11,14 @@
             <div class="row g-2">
                 <div class="col-md-6">
                     <div class="card border">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+                        <div id="AmnesiaTile" class="card-body d-flex align-items-center gap-3">
+                            <div id="AmnesiaTileCircle" class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">Amnesia Game Client</h6>
-                                <small class="text-muted">Not running</small>
+                                <small id="AmnesiaTileDesc" class="text-muted"></small>
                             </div>
-                            <button class="btn btn-outline-dark btn-sm">Start</button>
+                            <div id="AmnesiaTileActionsDiv">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -42,22 +43,35 @@
 @section Scripts
 {
     <script>
+        const amnesiaTile = document.getElementById('AmnesiaTile');
+        const amnesiaTileCircle = document.getElementById('AmnesiaTileCircle');
+        const amnesiaTileDesc = document.getElementById('AmnesiaTileDesc');
+        const amnesiaTileActionsDiv = document.getElementById('AmnesiaTileActionsDiv');
+
+        function onAmnesiaConnectPressed(event) {
+            startClient();
+            amnesiaStartButton.disabled = true;
+            event.preventDefault();
+        }
+
+        const amnesiaStartButton = document.createElement('button');
+        amnesiaStartButton.classList.add('btn', 'btn-outline-success', 'btn-sm', 'd-block');
+        amnesiaStartButton.innerText = 'Connect';
+        amnesiaStartButton.addEventListener('click', onAmnesiaConnectPressed);
+
+        const amnesiaWarningText = document.createElement('small');
+        amnesiaWarningText.classList.add('text-warning');
+
         const connection = new signalR.HubConnectionBuilder().withUrl("/statushub").build();
         connection.start().catch(function (err) {
             return console.error(err.toString());
         });
 
-        const amnesiaStatus = "@Model.CurrentAmnesiaClientState";
-
-        console.log("Amnesia Client Status:", amnesiaStatus);
+        setAmnesiaTileState("@Model.CurrentAmnesiaClientState");
 
         // TODO: Block until SignalR connects
 
-        // document.getElementById("sendButton").disabled = true;
-
-        connection.on("AmnesiaClientStateChanged", function (newState) {
-            console.log("SignalR: AmnesiaClientState:", newState);
-        });
+        connection.on("AmnesiaClientStateChanged", setAmnesiaTileState);
 
         function startClient() {
             connection.invoke("StartAmnesiaClient").catch(function (err) {
@@ -65,14 +79,29 @@
             });
         }
 
+        function setAmnesiaTileState(state) {
+            console.log("Amnesia client state: ", state);
 
-
-        // document.getElementById("sendButton").addEventListener("click", function (event) {
-        //     var message = document.getElementById("messageInput").value;
-        //     connection.invoke("Echo", message).catch(function (err) {
-        //         return console.error(err.toString());
-        //     });
-        //     event.preventDefault();
-        // });
+            if (state === 'Disconnected') {
+                amnesiaTileDesc.innerText = 'Not running';
+                amnesiaStartButton.disabled = false;
+                amnesiaWarningText.innerText = 'Open Amnesia.exe before pressing Start';
+                amnesiaTileActionsDiv.replaceChildren(amnesiaWarningText, amnesiaStartButton);
+            }
+            else if (state === 'Connecting') {
+                amnesiaTileDesc.innerText = 'Connecting...';
+                amnesiaWarningText.innerText = 'Ensure the game is running and in focus';
+                amnesiaTileActionsDiv.replaceChildren(amnesiaWarningText);
+            }
+            else if (state === 'Connected') {
+                amnesiaTileDesc.innerText = 'Connected';
+                amnesiaTileActionsDiv.replaceChildren();
+            }
+            else if (state === 'Failed') {
+                amnesiaTileDesc.innerText = 'ERROR';
+                amnesiaWarningText.innerText = 'Something went wrong...';
+                amnesiaTileActionsDiv.replaceChildren(amnesiaWarningText);
+            }
+        }
     </script>
 }
