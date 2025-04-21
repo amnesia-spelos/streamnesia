@@ -8,4 +8,8 @@
     <PackageReference Include="TwitchLib" Version="3.5.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Streamnesia.Core\Streamnesia.Core.csproj" />
+  </ItemGroup>
+
 </Project>

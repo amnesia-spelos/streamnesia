@@ -55,6 +55,8 @@
 
 #include "LuxPlayer.h"
 
+#include "LuxSocketServer.h"
+
 #include "LuxStaticProp.h"
 
 #include "LuxProp_Object.h"
@@ -447,7 +449,7 @@ bool cLuxBase::Init(const tString &asCommandline)
 
 	#endif
 	Log("\n");
-	
+
 	/////////////////////////////
 	// Init the engine
 	if(InitEngine()==false) return false;
@@ -1400,6 +1402,9 @@ bool cLuxBase::InitGame()
 	///////////////////////////////////////////////////////
 	// Run the LoadMainConfig message for game modules, couldn't be run before
 	RunModuleMessage(eLuxUpdateableMessage_LoadMainConfig);
+
+	mpSocketServer = hplNew(cLuxSocketServer, ());
+	AddGlobalModule(mpSocketServer);
 
 	return true;
 }

@@ -1,0 +1,83 @@
+﻿@model Streamnesia.Client.Models.SettingsModel
+
+<div class="container">
+    <main role="main" class="pb-3">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+
+        <form asp-action="SaveSettings" method="post" id="settingsForm">
+            <!-- Twitch Bot Config Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    Twitch Bot Config
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-1">
+                        <span class="input-group-text" id="TwitchChannelNameDesc">Twitch Channel</span>
+                        <span class="input-group-text">https://twitch.tv/</span>
+                        <input asp-for="TwitchBotConfig.TwitchChannelName" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="TwitchChannelNameDesc">
+                    </div>
+                    <span asp-validation-for="TwitchBotConfig.TwitchChannelName" class="text-danger mb-3 d-block"></span>
+
+                    <div class="input-group mb-1">
+                        <span class="input-group-text">Twitch bot name</span>
+                        <input asp-for="TwitchBotConfig.BotName" type="text" class="form-control" aria-label="Bot Name">
+                        <span class="input-group-text">Twitch bot API key</span>
+                        <input asp-for="TwitchBotConfig.BotApiKey" type="text" class="form-control" aria-label="API Key" id="BotApiKey">
+                        <div class="input-group-text">
+                            <input class="form-check-input" type="checkbox" id="showApiKeyToggle" onchange="toggleApiKeyVisibility()">
+                            <label class="form-check-label" for="showApiKeyToggle" style="margin-left: 5px; font-size: 14px; padding-top: 3px;">Show</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="TwitchBotConfig.BotName" class="text-danger d-block"></span>
+                    <span asp-validation-for="TwitchBotConfig.BotApiKey" class="text-danger mb-2 d-block"></span>
+                </div>
+            </div>
+
+            <!-- Game Config Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    Game Config (Advanced)
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        You won't need to adjust these settings unless you know what you're doing.
+                    </div>
+                    <div class="input-group mb-1">
+                        <span class="input-group-text">Host</span>
+                        <input asp-for="AmnesiaClientConfig.Host" type="text" class="form-control" aria-label="Host">
+                        <span class="input-group-text">Port</span>
+                        <input asp-for="AmnesiaClientConfig.Port" type="number" class="form-control" aria-label="Port">
+                    </div>
+                    <span asp-validation-for="AmnesiaClientConfig.Host" class="text-danger d-block"></span>
+                    <span asp-validation-for="AmnesiaClientConfig.Port" class="text-danger mb-3 d-block"></span>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button id="SaveButton" class="btn btn-success" type="submit">Save Changes</button>
+            </div>
+        </form>
+    </main>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Hide the API key on page load
+        window.addEventListener("DOMContentLoaded", () => {
+            const input = document.getElementById("BotApiKey");
+            if (!document.getElementById("showApiKeyToggle").checked) {
+                input.type = "password";
+            }
+        });
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById("BotApiKey");
+            const toggle = document.getElementById("showApiKeyToggle");
+            input.type = toggle.checked ? "text" : "password";
+        }
+    </script>
+}

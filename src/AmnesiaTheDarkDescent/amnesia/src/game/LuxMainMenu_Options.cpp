@@ -29,6 +29,7 @@
 #include "LuxPlayerHelpers.h"
 #include "LuxPlayer.h"
 #include "LuxHelpFuncs.h"
+#include "LuxSocketServer.h"
 
 //////////////////////////////////////////////////////////////////////////
 // HELPERS
@@ -231,6 +232,18 @@ void cLuxMainMenu_Options::CreateMainGui()
 	mpTabInput = pTabFrame->AddTab(kTranslate("MainMenu","OptionsInput"));
 	mpTabSound = pTabFrame->AddTab(kTranslate("MainMenu","OptionsSound"));
 #endif
+
+mpTabStreamnesia = pTabFrame->AddTab(_W("Streamnesia"));
+
+// Host input
+cVector3f vStreamHostPos(50, 40, 0);
+mpGuiSet->CreateWidgetLabel(vStreamHostPos - cVector3f(0, 25, 0), -1, _W("Host:"), mpTabStreamnesia);
+mpTextBoxStreamHost = mpGuiSet->CreateWidgetTextBox(vStreamHostPos, cVector2f(250, 25), _W("127.0.0.1"), mpTabStreamnesia);
+
+// Port input
+cVector3f vStreamPortPos(50, 100, 0);
+mpGuiSet->CreateWidgetLabel(vStreamPortPos - cVector3f(0, 25, 0), -1, _W("Port:"), mpTabStreamnesia);
+mpTextBoxStreamPort = mpGuiSet->CreateWidgetTextBox(vStreamPortPos, cVector2f(100, 25), _W("5150"), mpTabStreamnesia);
 
 #if USE_GAMEPAD
 	///////////////////
@@ -1337,6 +1350,14 @@ void cLuxMainMenu_Options::SetInputValues(cResourceVarsObject& aObj)
 		mpCBSndDevice->SetSelectedItem(lSndDevIdx, true, false);
 #endif
 
+	///////////////////////////////
+	// Streamnesia settings from server
+	if(gpBase->mpSocketServer)
+	{
+		mpTextBoxStreamHost->SetText(cString::To16Char(gpBase->mpSocketServer->GetHost()));
+		mpTextBoxStreamPort->SetText(cString::To16Char(cString::ToString(gpBase->mpSocketServer->GetPort())));
+	}
+
 	mbSettingInitialValues = false;
 }
 
@@ -1530,6 +1551,11 @@ void cLuxMainMenu_Options::ApplyChanges()
 	//--- REMOVED - Language is now loaded only at startup
 	//if(gpBase->LoadLanguage(cString::To8Char(mvLangFiles[mpCBLanguage->GetSelectedItem()])))
 	//	gpBase->mpMainMenu->RecreateGui();
+
+	tString sHost = cString::To8Char(mpTextBoxStreamHost->GetText());
+	int iPort = cString::ToInt(cString::To8Char(mpTextBoxStreamPort->GetText()).c_str(), 5150);
+
+	gpBase->mpSocketServer->SetConnectionSettings(sHost, iPort);
 }
 
 
