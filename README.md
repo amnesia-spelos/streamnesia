@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/github/license/petrspelos/Streamnesia?style=for-the-badge">
   </a>
   <a href="#">
-    <img src="https://img.shields.io/github/workflow/status/amnesia-spelos/streamnesia/dotnet/master?style=for-the-badge">
+    <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/amnesia-spelos/streamnesia/.github%2Fworkflows%2Fdotnet.yml?branch=master&style=for-the-badge">
   </a>
   <a href="https://dot.net">
     <img src="https://img.shields.io/badge/made%20with-.NET%209-blueviolet?style=for-the-badge">
