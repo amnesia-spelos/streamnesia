@@ -1,100 +1,102 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Streamnesia.CommandProcessing.Entities;
-using Streamnesia.Payloads;
+using Microsoft.Extensions.Logging;
+using Streamnesia.Core;
+using Streamnesia.Core.Entities;
 
 namespace Streamnesia.Payloads;
 
-public class CommandQueue
+public class CommandQueue(IAmnesiaClient amnesiaClient, ICommandPreprocessor commandPreprocessor, ILogger<CommandQueue> logger) : ICommandQueue
 {
-    private ConcurrentQueue<Payload> _payloadQueue = new ConcurrentQueue<Payload>();
-    private ConcurrentQueue<TimedInstruction> _instructionQueue = new ConcurrentQueue<TimedInstruction>();
-    public AmnesiaClient Amnesia { get; private set; } = new(new Random());
-    private bool _initialized = false;
+    private readonly ConcurrentQueue<PayloadModel> _payloadQueue = new();
+    private readonly ConcurrentQueue<TimedInstruction> _instructionQueue = new();
 
     public async Task StartCommandProcessingAsync(CancellationToken cancellationToken)
     {
-        try
+        if (!amnesiaClient.IsConnected)
         {
-            await Amnesia.AttachToGameAsync();
-            _initialized = true;
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("ERROR: Failed to attach to game");
-            throw;
+            logger.LogError("Cannot start command queue processing because the Amnesia client is not connected");
+            return;
         }
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            ProcessCommandQueue();
-            await ProcessInstructionQueue();
+            DequeueAndScheduleAvailablePayload();
+
+            await ProcessElapsedPayloadsAsync();
+
             await Task.Delay(1, cancellationToken);
         }
-
-        Amnesia.Dispose();
     }
 
-    public void AddPayload(Payload payload)
+    public void AddPayload(PayloadModel model)
     {
-        if(string.IsNullOrWhiteSpace(payload.Name))
+        if(string.IsNullOrWhiteSpace(model.Name))
         {
-            Console.WriteLine("The CommandQueue received an empty-named payload. This payload will not be executed.");
-            Console.WriteLine($"Thie empty-named payload contains {payload.Sequence.Length} sequence item(s).");
+            logger.LogError("The CommandQueue received an empty-named payload. This payload will not be executed.");
+            logger.LogError("The empty-named payload contains {Length} sequence item(s).", model.Sequence.Length);
             return;
         }
         
-        _payloadQueue.Enqueue(payload);
+        _payloadQueue.Enqueue(model);
     }
 
-    private void ProcessCommandQueue()
+    private void DequeueAndScheduleAvailablePayload()
     {
-        if (!_initialized || _payloadQueue.Count == 0)
+        if (!amnesiaClient.IsConnected || _payloadQueue.IsEmpty)
             return;
 
-        if(_payloadQueue.TryDequeue(out var payload) == false)
+        if(_payloadQueue.TryDequeue(out var model))
         {
-            Console.WriteLine("A dequeue of a payload failed");
-            return;
+            ProcessPayload(model);
         }
-
-        ProcessPayload(payload);
+        else
+        {
+            logger.LogError("A dequeue of a payload failed");
+        }
     }
 
-    private async Task ProcessInstructionQueue()
+    private void ProcessPayload(PayloadModel model)
     {
-        TimedInstruction extension;
-
-        for(var i = 0; i < _instructionQueue.Count; i++)
+        foreach (var sequenceItem in model.Sequence)
         {
-            if(_instructionQueue.TryDequeue(out extension) == false)
+            try
             {
-                Console.WriteLine("Failed to dequeue an instruction");
+                var code = commandPreprocessor.PreprocessCommand(File.ReadAllText(sequenceItem.File));
+                _instructionQueue.Enqueue(new TimedInstruction
+                {
+                    Angelcode = code,
+                    ExecuteAfterDateTime = DateTime.Now.Add(sequenceItem.Delay)
+                });
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "An exception occurred while trying to execute a timed instruction");
+            }
+        }
+    }
+
+    private async Task ProcessElapsedPayloadsAsync()
+    {
+        for (var i = 0; i < _instructionQueue.Count; i++)
+        {
+            if (_instructionQueue.TryDequeue(out TimedInstruction extension) == false)
+            {
+                logger.LogError("Failed to dequeue an instruction");
                 return;
             }
 
-            if(DateTime.Now >= extension.ExecuteAfterDateTime)
+            if (DateTime.Now >= extension.ExecuteAfterDateTime)
             {
-                Console.WriteLine($"Sending code: {extension.Angelcode}");
-                await Amnesia.ExecuteAsync(extension.Angelcode);
+                logger.LogInformation("Sending code: {Angelcode}", extension.Angelcode);
+                await amnesiaClient.ExecuteCommandAsync(extension.Angelcode);
                 return;
             }
 
             _instructionQueue.Enqueue(extension);
-        }
-    }
-
-    private void ProcessPayload(Payload payload)
-    {
-        foreach (var sequenceItem in payload.Sequence)
-        {
-            _instructionQueue.Enqueue(new TimedInstruction
-            {
-                Angelcode = sequenceItem.AngelCode,
-                ExecuteAfterDateTime = DateTime.Now.Add(sequenceItem.Delay)
-            });
         }
     }
 }

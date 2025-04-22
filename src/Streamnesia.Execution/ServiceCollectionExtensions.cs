@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAmnesiaExecution(this IServiceCollection services)
     {
         services.AddSingleton<Random>();
-        services.AddTransient<TcpClient>();
+        services.AddSingleton<TcpClient>();
         services.AddSingleton<IAmnesiaClient, AmnesiaClient>();
 
         return services;

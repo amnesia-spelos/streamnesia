@@ -1,6 +1,7 @@
 ﻿using Streamnesia.Configuration;
 using Streamnesia.Execution;
 using Streamnesia.Twitch;
+using Streamnesia.Payloads;
 
 namespace Streamnesia.Client.Extensions;
 
@@ -11,6 +12,7 @@ public static class ServiceCollectionExtensions
         services.AddAmnesiaExecution();
         services.AddTwitchBot();
         services.AddStreamnesiaConfiguration();
+        services.AddPayloads();
 
         return services;
     }

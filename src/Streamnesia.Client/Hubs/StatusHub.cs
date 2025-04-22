@@ -3,16 +3,9 @@ using Streamnesia.Core;
 
 namespace Streamnesia.Client.Hubs;
 
-public class StatusHub : Hub
+public class StatusHub(IAmnesiaClient amnesiaClient) : Hub
 {
-    private readonly IAmnesiaClient _amnesiaClient;
+    public Task StartAmnesiaClient() => amnesiaClient.ConnectAsync();
 
-    public StatusHub(IAmnesiaClient amnesiaClient)
-    {
-        _amnesiaClient = amnesiaClient;
-    }
-
-    public Task StartAmnesiaClient() => _amnesiaClient.ConnectAsync();
-
-    public Task StopAmnesiaClient() => _amnesiaClient.Disconnect();
+    public Task StopAmnesiaClient() => amnesiaClient.Disconnect();
 }
