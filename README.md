@@ -5,34 +5,31 @@
     <img src="https://img.shields.io/github/license/petrspelos/Streamnesia?style=for-the-badge">
   </a>
   <a href="#">
-    <img src="https://img.shields.io/github/workflow/status/petrspelos/Streamnesia/dotnet/master?style=for-the-badge">
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/codacy/grade/e3b6d88439154ae78ba1da0ef9318e50/master?style=for-the-badge">
+    <img src="https://img.shields.io/github/workflow/status/amnesia-spelos/streamnesia/dotnet/master?style=for-the-badge">
   </a>
   <a href="https://dot.net">
-    <img src="https://img.shields.io/badge/made%20with-.NET%206-blueviolet?style=for-the-badge">
+    <img src="https://img.shields.io/badge/made%20with-.NET%209-blueviolet?style=for-the-badge">
   </a>
 </p>
 
 
-Streamnesia is a "Chaos Mod", meaning it changes what happens during your playthrough of the game. Your screen can be upside down for a minute, or maybe all doors unlock. In the base package, there are around 40 different events.
+Streamnesia is a "Chaos Mod", meaning it changes what happens during your playthrough of the game. Your screen can be upside down for a minute, or maybe all doors unlock.
 
 ## Payloads
 
-:warning: **This repository does not include payloads anymore... Those have been moved into it's own repository for easier sync:**
-
-https://github.com/petrspelos/streamnesia-payloads
+📦 By default, the application downloads a collection of community-made payloads. If you would like to browse them, or if you would like to contribute, see the [streamnesia-payloads repository](https://github.com/amnesia-spelos/streamnesia-payloads).
 
 ## Install & Play
 
-1. See the [Release Page](https://github.com/petrspelos/Streamnesia/releases) and download a build of the mod
-2. Follow [This YouTube guide](https://youtu.be/tnXvUmFc-84) to setup Streamnesia
+1. See the [Release Page](https://github.com/amnesia-spelos/streamnesia/releases) and download a build of the mod
+2. ⚠️ This section is still work in progress and the installation instructions will be updated with the new 3.0 release, where the flow will change
 
-## Contributing & Building
+## Contributing
 
-_This section will be filled at a later date..._
+🎉 If you would like to contribute to this project, stay tuned. A contributing guide is being worked on, as well as onboarding materials and good first issues.
 
-_Building is pretty much same as the Amnesia: The Dark Descent game_
+<a href="https://github.com/amnesia-spelos/streamnesia/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=amnesia-spelos/streamnesia" />
+</a>
 
-_For the .NET applications: .NET Core 3.1 is required_
+Made with [contrib.rocks](https://contrib.rocks).
