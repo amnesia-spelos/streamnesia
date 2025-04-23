@@ -18,7 +18,7 @@ public class CommandQueue(
     private readonly ConcurrentQueue<TimedInstruction> _instructionQueue = new();
 
     private CancellationTokenSource _cts;
-    private Task? _processingTask;
+    private Task _processingTask;
     private readonly object _lock = new();
 
     public void AddPayload(PayloadModel model)
