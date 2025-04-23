@@ -439,7 +439,7 @@ void cLuxMapHandler::SetCurrentMap(cLuxMap* apMap, bool abRunScript, bool abFirs
 	if (gpBase && gpBase->mpSocketServer && apMap)
 	{
 		tString mapFile = apMap->GetFileName();
-		tString message = "EVENT:MapChanged:" + mapFile + "\n";
+		tString message = "EVENT:MapChanged:" + mapFile;
 		gpBase->mpSocketServer->SendMessage(message);
 	}
 
