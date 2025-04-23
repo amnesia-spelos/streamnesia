@@ -18,16 +18,17 @@ public partial class AmnesiaClient(
     ILogger<AmnesiaClient> logger
     ) : IAmnesiaClient
 {
+    public bool IsConnected => client.Connected;
 
+    public event AsyncStateChangedHandler StateChangedAsync;
+
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingResponses = new();
     private readonly Stopwatch _stopwatch = new();
 
     private NetworkStream _stream;
     private StreamWriter _writer;
     private StreamReader _reader;
-
-    public bool IsConnected => client.Connected;
-
-    public event AsyncStateChangedHandler StateChangedAsync;
+    private CancellationTokenSource _listenCts;
 
     // FIXME: There is definitely a better way to return errors to the UI
     private string _errorMessage = string.Empty;
@@ -64,15 +65,13 @@ public partial class AmnesiaClient(
         }
     }
 
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingResponses = new();
-
     private async Task ListenLoopAsync(CancellationToken cancellationToken)
     {
         try
         {
             while (!cancellationToken.IsCancellationRequested && client.Connected)
             {
-                var line = await _reader.ReadLineAsync(cancellationToken);
+                var line = await ReadNextLineSafe(cancellationToken);
                 if (line == null) break; // disconnected
 
                 if (line.StartsWith("EVENT:"))
@@ -81,10 +80,19 @@ public partial class AmnesiaClient(
                 }
                 else if (line.StartsWith("RESPONSE:"))
                 {
+                    logger.LogDebug("Amnesia response received: {line}", line);
                     var parts = line.Split(':', 3); // RESPONSE:getmap:level01.map
-                    if (parts.Length >= 3 && _pendingResponses.TryRemove(parts[1], out var tcs))
+                    if (parts.Length >= 3)
                     {
-                        tcs.SetResult(parts[2]);
+                        if (_pendingResponses.TryRemove(parts[1], out var tcs))
+                        {
+                            tcs.TrySetResult(parts[2]);
+                            logger.LogDebug("Pending response removed. Current pending responses count: {Count}", _pendingResponses.Count);
+                        }
+                        else
+                        {
+                            logger.LogDebug("Failed to remove a response from the queue");
+                        }
                     }
                     else
                     {
@@ -104,6 +112,21 @@ public partial class AmnesiaClient(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error in socket listen loop.");
+        }
+    }
+
+    private async Task<string> ReadNextLineSafe(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var line = await _reader.ReadLineAsync(cancellationToken);
+            return line;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to read the next client line.");
+
+            return null;
         }
     }
 
@@ -135,7 +158,8 @@ public partial class AmnesiaClient(
         }
         await WaitForWelcomeMessageAsync(cancellationToken);
 
-        _ = Task.Run(() => ListenLoopAsync(cancellationToken), CancellationToken.None);
+        _listenCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _ = Task.Run(() => ListenLoopAsync(cancellationToken), _listenCts.Token);
 
         return Result.Ok();
     }
@@ -185,6 +209,12 @@ public partial class AmnesiaClient(
 
         string tag = rawInstruction.Split(':')[0]; // e.g., "getmap" or "exec"
         var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        if (_pendingResponses.ContainsKey(tag))
+        {
+            logger.LogDebug("A pending response with the tag '{Tag}' already exists.", tag);
+        }
+
         _pendingResponses[tag] = tcs;
 
         await _writer.WriteLineAsync(rawInstruction);
@@ -205,6 +235,10 @@ public partial class AmnesiaClient(
             logger.LogError(ex, "Timeout or error waiting for response to {tag}", tag);
             return Result.Fail($"Timeout/error waiting for response: {tag}");
         }
+        finally
+        {
+            _pendingResponses.TryRemove(tag, out _);
+        }
     }
 
     public void Dispose()
@@ -219,9 +253,13 @@ public partial class AmnesiaClient(
     {
         if (client.Connected)
         {
-            logger.LogInformation("Client disconnected");
+            logger.LogInformation("Disconnecting client...");
+            _listenCts?.Cancel(); // cancel the listener before closing the stream
+            _listenCts?.Dispose();
+            _listenCts = null;
+
             client.Close();
-            client = new TcpClient(); // FIXME: Perhaps get service collection and request a new one?
+            client = new TcpClient(); // replace with new instance
             State = AmnesiaClientState.Disconnected;
         }
 
