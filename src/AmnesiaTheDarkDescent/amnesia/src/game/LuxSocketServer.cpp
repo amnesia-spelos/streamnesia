@@ -91,8 +91,7 @@ void cLuxSocketServer::Update(float afTimeStep)
             Log("Client connected!\n");
             mClientSocket = clientSocket;
 
-            const char* welcomeMsg = "Hello, from Amnesia: The Dark Descent!\n";
-            send(mClientSocket, welcomeMsg, (int)strlen(welcomeMsg), 0);
+            SendMessage("Hello, from Amnesia: The Dark Descent!");
         }
     }
 
@@ -120,8 +119,7 @@ void cLuxSocketServer::Update(float afTimeStep)
 
             if (strcmp(buffer, "ping") == 0)
             {
-				tString response = "RESPONSE:ping:pong\n";
-                send(mClientSocket, response.c_str(), (int)response.length(), 0);
+				SendMessage("RESPONSE:ping:pong");
             }
             else if (strcmp(buffer, "getpos") == 0)
             {
@@ -129,12 +127,12 @@ void cLuxSocketServer::Update(float afTimeStep)
                 {
                     cVector3f vPos = gpBase->mpPlayer->GetCharacterBody()->GetFeetPosition();
                     char response[128];
-                    sprintf(response, "RESPONSE:getpos:%.2f, %.2f, %.2f\n", vPos.x, vPos.y, vPos.z);
-                    send(mClientSocket, response, (int)strlen(response), 0);
+                    sprintf(response, "RESPONSE:getpos:%.2f, %.2f, %.2f", vPos.x, vPos.y, vPos.z);
+                    SendMessage(response);
                 }
                 else
                 {
-                    send(mClientSocket, "RESPONSE:getpos:no map loaded\n", 15, 0);
+                    SendMessage("RESPONSE:getpos:no map loaded");
                 }
             }
 			else if (strcmp(buffer, "getmap") == 0)
@@ -142,13 +140,11 @@ void cLuxSocketServer::Update(float afTimeStep)
 				if (gpBase->mpMapHandler && gpBase->mpMapHandler->GetCurrentMap())
 				{
 					tString mapFile = gpBase->mpMapHandler->GetCurrentMap()->GetFileName();
-					tString response = "RESPONSE:getmap:" + mapFile + "\n";
-					send(mClientSocket, response.c_str(), (int)response.length(), 0);
+					SendMessage("RESPONSE:getmap:" + mapFile);
 				}
 				else
 				{
-					const char* msg = "RESPONSE:getmap:no map loaded\n";
-					send(mClientSocket, msg, (int)strlen(msg), 0);
+					SendMessage("RESPONSE:getmap:no map loaded");
 				}
 			}
             else if (strncmp(buffer, "exec:", 5) == 0)
@@ -157,16 +153,16 @@ void cLuxSocketServer::Update(float afTimeStep)
                 if (gpBase->mpMapHandler && gpBase->mpMapHandler->GetCurrentMap())
                 {
                     gpBase->mpMapHandler->GetCurrentMap()->RunScript(script);
-                    send(mClientSocket, "RESPONSE:exec:script executed\n", 16, 0);
+					SendMessage("RESPONSE:exec:script executed");
                 }
                 else
                 {
-                    send(mClientSocket, "RESPONSE:exec:no map loaded\n", 15, 0);
+					SendMessage("RESPONSE:exec:no map loaded");
                 }
             }
             else
             {
-                send(mClientSocket, "WARNING:Unknown command\n", 17, 0);
+                SendMessage("WARNING:Unknown command");
             }
         }
         else if (bytesReceived == 0 || (bytesReceived == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK))
@@ -182,7 +178,13 @@ void cLuxSocketServer::SendMessage(const tString& message)
 {
     if (mClientSocket != INVALID_SOCKET)
     {
-        send(mClientSocket, message.c_str(), (int)message.length(), 0);
+        tString safeMessage = message;
+
+        // Add newline if not already present
+        if (safeMessage.empty() || safeMessage[safeMessage.length() - 1] != '\n')
+            safeMessage += "\n";
+
+        send(mClientSocket, safeMessage.c_str(), (int)safeMessage.length(), 0);
     }
 }
 

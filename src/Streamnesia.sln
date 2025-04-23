@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Payloads", "Str
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Twitch", "Streamnesia.Twitch\Streamnesia.Twitch.csproj", "{E9E8DE2C-4323-4B7C-A6AD-914838790627}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.WebApp", "Streamnesia.WebApp\Streamnesia.WebApp.csproj", "{1FB61C6E-E267-4690-A98B-5801DCD67489}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Client", "Streamnesia.Client\Streamnesia.Client.csproj", "{1A020974-C5D1-4A74-B4B8-A7872AAEF0EC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Core", "Streamnesia.Core\Streamnesia.Core.csproj", "{9164803F-818C-4857-819A-F184E87D6C9B}"
@@ -51,18 +49,6 @@ Global
 		{E9E8DE2C-4323-4B7C-A6AD-914838790627}.Release|x64.Build.0 = Release|Any CPU
 		{E9E8DE2C-4323-4B7C-A6AD-914838790627}.Release|x86.ActiveCfg = Release|Any CPU
 		{E9E8DE2C-4323-4B7C-A6AD-914838790627}.Release|x86.Build.0 = Release|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Debug|x64.Build.0 = Debug|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Debug|x86.Build.0 = Debug|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Release|x64.ActiveCfg = Release|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Release|x64.Build.0 = Release|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Release|x86.ActiveCfg = Release|Any CPU
-		{1FB61C6E-E267-4690-A98B-5801DCD67489}.Release|x86.Build.0 = Release|Any CPU
 		{1A020974-C5D1-4A74-B4B8-A7872AAEF0EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1A020974-C5D1-4A74-B4B8-A7872AAEF0EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A020974-C5D1-4A74-B4B8-A7872AAEF0EC}.Debug|x64.ActiveCfg = Debug|Any CPU

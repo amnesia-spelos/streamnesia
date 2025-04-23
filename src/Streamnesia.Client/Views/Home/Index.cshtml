@@ -35,6 +35,8 @@
                         </div>
                     </div>
                 </div>
+
+                <button onclick="runCmdQueueTest()" class="btn btn-outline-dark btn-sm">DEV: Run Command Queue Test</button>
             </div>
         </div>
     </main>
@@ -63,6 +65,12 @@
             amnesiaStopButton.disabled = true;
             stopClient();
             event.preventDefault();
+        }
+
+        function runCmdQueueTest() {
+            connection.invoke("RunCommandQueueTest").catch(function (err) {
+                return console.error(err.toString());
+            });
         }
 
         const amnesiaStartButton = document.createElement('button');
