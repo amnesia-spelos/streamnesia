@@ -5,7 +5,8 @@ namespace Streamnesia.Configuration;
 
 public class ConfigurationStorage(
     IStoredItem<AmnesiaClientConfig> storedAmnesiaClientCfg,
-    IStoredItem<TwitchBotConfig> storedTwitchBotCfg
+    IStoredItem<TwitchBotConfig> storedTwitchBotCfg,
+    IStoredItem<PayloadLoaderConfig> storedPayloadLoaderCfg
     ) : IConfigurationStorage
 {
     public AmnesiaClientConfig ReadAmnesiaClientConfig()
@@ -46,9 +47,35 @@ public class ConfigurationStorage(
         return newCfg;
     }
 
+    public PayloadLoaderConfig ReadPayloadLoaderConfig()
+    {
+        var cfg = storedPayloadLoaderCfg.Retrieve();
+
+        if (cfg.IsFailed)
+        {
+            // TODO: propagate better
+            throw new InvalidOperationException("storage operation failed");
+        }
+
+        if (cfg.Value is not null)
+            return cfg.Value;
+
+        var newCfg = new PayloadLoaderConfig();
+        storedPayloadLoaderCfg.Overwrite(newCfg);
+
+        return newCfg;
+    }
+
     public void WriteAmnesiaClientConfig(AmnesiaClientConfig newConfig)
         => storedAmnesiaClientCfg.Overwrite(newConfig);
 
     public void WriteTwitchBotConfig(TwitchBotConfig newConfig)
         => storedTwitchBotCfg.Overwrite(newConfig);
+
+    public void WritePayloadLoaderConfig(PayloadLoaderConfig newConfig)
+    {
+        newConfig.CustomPayloadsFile ??= string.Empty;
+
+        storedPayloadLoaderCfg.Overwrite(newConfig);
+    }
 }

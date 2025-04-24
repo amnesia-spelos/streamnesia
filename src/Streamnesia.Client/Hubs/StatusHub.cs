@@ -20,7 +20,7 @@ public class StatusHub(IAmnesiaClient amnesiaClient, ICommandQueue queue, IPaylo
         }
         else
         {
-            logger.LogInformation("Payloads loaded. Loaded {Count} payloads.", payloadLoader.Payloads.Count);
+            logger.LogInformation("Payloads loaded. Loaded {Count} payloads.", payloadLoader.Payloads?.Count);
         }
     }
 

@@ -22,6 +22,7 @@ public class HomeController(IConfigurationStorage cfgStorage, IAmnesiaClient amn
         {
             AmnesiaClientConfig = cfgStorage.ReadAmnesiaClientConfig(),
             TwitchBotConfig = cfgStorage.ReadTwitchBotConfig(),
+            PayloadLoaderConfig = cfgStorage.ReadPayloadLoaderConfig()
         });
     }
 
@@ -43,8 +44,16 @@ public class HomeController(IConfigurationStorage cfgStorage, IAmnesiaClient amn
         if (!ModelState.IsValid)
             return View("Settings", model);
 
+        if (!string.IsNullOrWhiteSpace(model.PayloadLoaderConfig.CustomPayloadsFile) &&
+            !System.IO.File.Exists(model.PayloadLoaderConfig.CustomPayloadsFile))
+        {
+            ModelState.AddModelError("PayloadLoaderConfig.CustomPayloadsFile", "The file does not exist.");
+            return View("Settings", model);
+        }
+
         cfgStorage.WriteAmnesiaClientConfig(model.AmnesiaClientConfig);
         cfgStorage.WriteTwitchBotConfig(model.TwitchBotConfig);
+        cfgStorage.WritePayloadLoaderConfig(model.PayloadLoaderConfig);
 
         TempData["SuccessMessage"] = "Settings saved successfully!";
         return RedirectToAction("Settings");

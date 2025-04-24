@@ -7,4 +7,6 @@ public class SettingsModel
     public required AmnesiaClientConfig AmnesiaClientConfig { get; set; }
 
     public required TwitchBotConfig TwitchBotConfig { get; set; }
+
+    public required PayloadLoaderConfig PayloadLoaderConfig { get; set; }
 }

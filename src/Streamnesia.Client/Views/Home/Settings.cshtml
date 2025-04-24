@@ -35,6 +35,29 @@
                     <span asp-validation-for="TwitchBotConfig.BotApiKey" class="text-danger mb-2 d-block"></span>
                 </div>
             </div>
+            <!-- Payload Loader Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    Payload Loader Config
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch">
+                        <input asp-for="PayloadLoaderConfig.DownloadEnabled" class="form-check-input" type="checkbox" role="switch" id="DownloadEnabled">
+                        <label class="form-check-label" for="DownloadEnabled">Download Enabled</label>
+                    </div>
+                    <span asp-validation-for="PayloadLoaderConfig.DownloadEnabled" class="text-danger d-block"></span>
+                    <div class="form-check form-switch">
+                        <input asp-for="PayloadLoaderConfig.UseVanillaPayloads" class="form-check-input" type="checkbox" role="switch" id="UseVanillaPayloads">
+                        <label class="form-check-label" for="UseVanillaPayloads">Use Vanilla Payloads</label>
+                    </div>
+                    <span asp-validation-for="PayloadLoaderConfig.UseVanillaPayloads" class="text-danger d-block"></span>
+                    <div class="mb-3 mt-4">
+                        <label for="CustomPayloadsFile" class="form-label">Custom Payloads File:</label>
+                        <input asp-for="PayloadLoaderConfig.CustomPayloadsFile" type="text" class="form-control" id="CustomPayloadsFile" placeholder="myFile.json">
+                    </div>
+                    <span asp-validation-for="PayloadLoaderConfig.CustomPayloadsFile" class="text-danger d-block"></span>
+                </div>
+            </div>
 
             <!-- Game Config Section -->
             <div class="card mb-4">
