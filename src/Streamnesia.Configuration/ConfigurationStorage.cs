@@ -7,7 +7,8 @@ public class ConfigurationStorage(
     IStoredItem<AmnesiaClientConfig> storedAmnesiaClientCfg,
     IStoredItem<TwitchBotConfig> storedTwitchBotCfg,
     IStoredItem<PayloadLoaderConfig> storedPayloadLoaderCfg,
-    IStoredItem<LocalChaosConfig> storedLocalChaosCfg
+    IStoredItem<LocalChaosConfig> storedLocalChaosCfg,
+    IStoredItem<TwitchPollConfig> storedTwitchPollCfg
     ) : IConfigurationStorage
 {
     public AmnesiaClientConfig ReadAmnesiaClientConfig()
@@ -86,6 +87,25 @@ public class ConfigurationStorage(
         return newCfg;
     }
 
+    public TwitchPollConfig ReadTwitchPollConfig()
+    {
+        var cfg = storedTwitchPollCfg.Retrieve();
+
+        if (cfg.IsFailed)
+        {
+            // TODO: propagate better
+            throw new InvalidOperationException("storage operation failed");
+        }
+
+        if (cfg.Value is not null)
+            return cfg.Value;
+
+        var newCfg = new TwitchPollConfig();
+        storedTwitchPollCfg.Overwrite(newCfg);
+
+        return newCfg;
+    }
+
     public void WriteAmnesiaClientConfig(AmnesiaClientConfig newConfig)
         => storedAmnesiaClientCfg.Overwrite(newConfig);
 
@@ -101,4 +121,7 @@ public class ConfigurationStorage(
 
     public void WriteLocalChaosConfig(LocalChaosConfig newConfig)
         => storedLocalChaosCfg.Overwrite(newConfig);
+
+    public void WriteTwitchPollConfig(TwitchPollConfig newConfig)
+    => storedTwitchPollCfg.Overwrite(newConfig);
 }

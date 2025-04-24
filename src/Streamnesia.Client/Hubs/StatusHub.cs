@@ -1,5 +1,4 @@
-﻿using System.IO.Pipelines;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Streamnesia.Core;
 using Streamnesia.Core.Entities;
 
@@ -10,6 +9,8 @@ public class StatusHub(
     ICommandQueue queue,
     IPayloadLoader payloadLoader,
     ILocalPayloadConductor localConductor,
+    ITwitchPollConductor twitchConductor,
+    ITwitchBot twitchBot,
     ILogger<StatusHub> logger) : Hub
 {
     public Task StartAmnesiaClient() => amnesiaClient.ConnectAsync();
@@ -86,5 +87,31 @@ public class StatusHub(
         }
 
         logger.LogInformation("Local chaos running... Good luck!");
+    }
+
+    public async Task StartTwitchPollChaos()
+    {
+        var result = await twitchConductor.InitializeAsync();
+
+        if (result.IsFailed)
+        {
+            logger.LogError("Result Failed: {Result}", string.Join(", ", result.Errors.Select(e => e.Message)));
+            return;
+        }
+
+        logger.LogInformation("Twitch poll chaos running... Best of luck to you, my friend!");
+    }
+
+    public async Task StartTwitchBot()
+    {
+        var result = await twitchBot.ConnectAsync();
+
+        if (result.IsFailed)
+        {
+            logger.LogError("Result Failed: {Result}", string.Join(", ", result.Errors.Select(e => e.Message)));
+            return;
+        }
+
+        logger.LogInformation("Twitch bot started...");
     }
 }

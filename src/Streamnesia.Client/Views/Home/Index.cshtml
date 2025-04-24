@@ -37,7 +37,11 @@
                 </div>
 
                 <button onclick="loadPayloadsTest()" class="btn btn-outline-primary btn-sm">📦 Load Payloads</button>
+                <button onclick="startTwitchBot()" class="btn btn-outline-secondary btn-sm">🤖 Start Twitch bot</button>
                 <button onclick="runCmdQueueTest()" class="btn btn-outline-secondary btn-sm">▶️ Run Command Queue Test</button>
+                <button onclick="startTwitchPoll()" class="btn btn-outline-danger btn-lg">💀💀💀💀 START TWITCH POLL CHAOS 💀💀💀💀</button>
+                <br />
+                <br />
                 <button onclick="startChaosTest()" class="btn btn-outline-danger btn-lg">💀 START LOCAL CHAOS</button>
             </div>
         </div>
@@ -83,6 +87,18 @@
 
         function startChaosTest() {
             connection.invoke("StartLocalChaos").catch(function (err) {
+                return console.error(err.toString());
+            });
+        }
+
+        function startTwitchPoll() {
+            connection.invoke("StartTwitchPollChaos").catch(function (err) {
+                return console.error(err.toString());
+            });
+        }
+
+        function startTwitchBot() {
+            connection.invoke("StartTwitchBot").catch(function (err) {
                 return console.error(err.toString());
             });
         }

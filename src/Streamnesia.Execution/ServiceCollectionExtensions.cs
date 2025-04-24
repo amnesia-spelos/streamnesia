@@ -13,6 +13,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<TcpClient>();
         services.AddSingleton<IAmnesiaClient, AmnesiaClient>();
         services.AddSingleton<ILocalPayloadConductor, LocalPayloadConductor>();
+        services.AddSingleton<ITwitchPollConductor, TwitchPollConductor>();
+        services.AddSingleton(typeof(IPoll<>), typeof(Poll<>));
 
         return services;
     }
