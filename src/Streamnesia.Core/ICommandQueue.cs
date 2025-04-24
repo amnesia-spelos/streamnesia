@@ -4,7 +4,7 @@ namespace Streamnesia.Core;
 
 public interface ICommandQueue
 {
-    public void AddPayload(PayloadModel model);
+    public void AddPayload(ParsedPayload model);
 
     public void Start();
 

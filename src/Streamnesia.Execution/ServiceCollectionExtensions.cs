@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<Random>();
         services.AddSingleton<TcpClient>();
         services.AddSingleton<IAmnesiaClient, AmnesiaClient>();
+        services.AddSingleton<ILocalPayloadConductor, LocalPayloadConductor>();
 
         return services;
     }

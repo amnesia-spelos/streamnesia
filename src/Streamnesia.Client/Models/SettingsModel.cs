@@ -9,4 +9,6 @@ public class SettingsModel
     public required TwitchBotConfig TwitchBotConfig { get; set; }
 
     public required PayloadLoaderConfig PayloadLoaderConfig { get; set; }
+
+    public required LocalChaosConfig LocalChaosConfig { get; set; }
 }

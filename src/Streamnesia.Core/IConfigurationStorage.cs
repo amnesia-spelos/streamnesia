@@ -15,4 +15,8 @@ public interface IConfigurationStorage
     PayloadLoaderConfig ReadPayloadLoaderConfig();
 
     void WritePayloadLoaderConfig(PayloadLoaderConfig newConfig);
+
+    LocalChaosConfig ReadLocalChaosConfig();
+
+    void WriteLocalChaosConfig(LocalChaosConfig newConfig);
 }

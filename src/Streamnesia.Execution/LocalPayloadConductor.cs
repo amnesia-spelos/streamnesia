@@ -1,0 +1,98 @@
+﻿using System.Linq;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentResults;
+using Microsoft.Extensions.Logging;
+using Streamnesia.Core;
+using Streamnesia.Core.Configuration;
+
+namespace Streamnesia.Execution;
+
+public class LocalPayloadConductor(
+    IAmnesiaClient amnesiaClient,
+    IPayloadLoader payloadLoader,
+    ICommandQueue commandQueue,
+    IConfigurationStorage cfgStorage,
+    ILogger<LocalPayloadConductor> logger) : ILocalPayloadConductor
+{
+    private LocalChaosConfig? _config;
+    private CancellationTokenSource? _loopCts;
+    private Task? _loopTask;
+
+    public Result Start()
+    {
+        _config = cfgStorage.ReadLocalChaosConfig();
+
+        if (_config is null)
+        {
+            logger.LogError("Failed to read config");
+            return Result.Fail("Failed to read config");
+        }
+
+        if (payloadLoader.Payloads is null || payloadLoader.Payloads.Count == 0)
+        {
+            logger.LogError("Cannot start: No payloads loaded");
+            return Result.Fail("Cannot start: No payloads loaded");
+        }
+
+        if (!amnesiaClient.IsConnected)
+        {
+            logger.LogError("Cannot start: Amnesia client not connected");
+            return Result.Fail("Cannot start: Amnesia client not connected");
+        }
+
+        commandQueue.Start();
+        logger.LogInformation("Command queue started");
+
+        _loopCts = new();
+        _loopTask = RunLoopAsync(_loopCts.Token);
+
+        return Result.Ok();
+    }
+
+    public Result Stop()
+    {
+        if (_loopCts is not null)
+        {
+            _loopCts.Cancel();
+            _loopCts.Dispose();
+            _loopCts = null;
+        }
+
+        logger.LogInformation("Chaos mode loop stopped");
+        return Result.Ok();
+    }
+
+    private async Task RunLoopAsync(CancellationToken token)
+    {
+        if (payloadLoader.Payloads is null || payloadLoader.Payloads.Count == 0)
+            return;
+
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(_config?.IntervalInSeconds ?? 10)); // TODO: FIXME: better fallback? Live config update?
+
+        while (await timer.WaitForNextTickAsync(token))
+        {
+            logger.LogDebug("Chaos timer tick");
+
+            try
+            {
+                var randomPayload = payloadLoader.Payloads.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+
+                if (randomPayload is not null)
+                {
+                    logger.LogInformation("Adding random payload: {PayloadName}", randomPayload.Name);
+                    commandQueue.AddPayload(randomPayload);
+                }
+                else
+                {
+                    logger.LogWarning("No payload selected. Payloads list may be empty.");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Exception occurred during chaos payload loop.");
+            }
+        }
+    }
+}

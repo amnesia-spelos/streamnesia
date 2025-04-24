@@ -35,6 +35,7 @@
                     <span asp-validation-for="TwitchBotConfig.BotApiKey" class="text-danger mb-2 d-block"></span>
                 </div>
             </div>
+
             <!-- Payload Loader Section -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -56,6 +57,20 @@
                         <input asp-for="PayloadLoaderConfig.CustomPayloadsFile" type="text" class="form-control" id="CustomPayloadsFile" placeholder="myFile.json">
                     </div>
                     <span asp-validation-for="PayloadLoaderConfig.CustomPayloadsFile" class="text-danger d-block"></span>
+                </div>
+            </div>
+
+            <!-- Local Chaos Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    Local Chaos Config
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 mt-4">
+                        <label for="CustomPayloadsFile" class="form-label">Custom Payloads File:</label>
+                        <input asp-for="LocalChaosConfig.IntervalInSeconds" type="number" class="form-control" id="CustomPayloadsFile">
+                    </div>
+                    <span asp-validation-for="LocalChaosConfig.IntervalInSeconds" class="text-danger d-block"></span>
                 </div>
             </div>
 
