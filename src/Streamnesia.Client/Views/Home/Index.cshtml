@@ -36,7 +36,8 @@
                     </div>
                 </div>
 
-                <button onclick="runCmdQueueTest()" class="btn btn-outline-dark btn-sm">DEV: Run Command Queue Test</button>
+                <button onclick="loadPayloadsTest()" class="btn btn-outline-primary btn-sm">DEV: Load Payloads</button>
+                <button onclick="runCmdQueueTest()" class="btn btn-outline-primary btn-sm">DEV: Run Command Queue Test</button>
             </div>
         </div>
     </main>
@@ -69,6 +70,12 @@
 
         function runCmdQueueTest() {
             connection.invoke("RunCommandQueueTest").catch(function (err) {
+                return console.error(err.toString());
+            });
+        }
+
+        function loadPayloadsTest() {
+            connection.invoke("LoadPayloadsTest").catch(function (err) {
                 return console.error(err.toString());
             });
         }

@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddStreamnesiaDependencies(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpClient();
         services.AddAmnesiaExecution();
         services.AddTwitchBot();
         services.AddStreamnesiaConfiguration();

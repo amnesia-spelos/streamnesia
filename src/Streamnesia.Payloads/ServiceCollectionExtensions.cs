@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<ICommandPreprocessor, CommandPreprocessor>();
         services.AddSingleton<ICommandQueue, CommandQueue>();
+        services.AddSingleton<IPayloadLoader, PayloadLoader>();
 
         return services;
     }
