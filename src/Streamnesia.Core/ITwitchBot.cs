@@ -6,9 +6,9 @@ public record struct MessageEventArgs(string UserId, string Message);
 
 public interface ITwitchBot
 {
-    bool IsConnected { get; }
+    //bool IsConnected { get; }
 
-    Task<Result> ConnectAsync(CancellationToken cancellationToken = default);
+    //Task<Result> ConnectAsync(CancellationToken cancellationToken = default);
 
-    event EventHandler<MessageEventArgs> MessageReceived;
+    //event EventHandler<MessageEventArgs> MessageReceived;
 }

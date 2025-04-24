@@ -12,65 +12,66 @@ using TwitchLib.Communication.Models;
 
 namespace Streamnesia.Twitch;
 
+// NOTE(spelos): Reimplementation pending
 public class TwitchBot : ITwitchBot
 {
-    private readonly IConfigurationStorage _configStorage;
-    private readonly ILogger<TwitchBot> _logger;
+    //private readonly IConfigurationStorage _configStorage;
+    //private readonly ILogger<TwitchBot> _logger;
 
-    private TwitchClient _client;
+    //private TwitchClient _client;
 
-    public event EventHandler<MessageEventArgs> MessageReceived;
+    //public event EventHandler<MessageEventArgs> MessageReceived;
 
-    public bool IsConnected => _client.IsConnected;
+    //public bool IsConnected => _client.IsConnected;
 
-    public TwitchBot(IConfigurationStorage configStorage, ILogger<TwitchBot> logger)
-    {
-        _configStorage = configStorage;
-        _logger = logger;
+    //public TwitchBot(IConfigurationStorage configStorage, ILogger<TwitchBot> logger)
+    //{
+    //    _configStorage = configStorage;
+    //    _logger = logger;
 
-        _client.OnJoinedChannel += Client_OnJoinedChannel;
-        _client.OnMessageReceived += Client_OnMessageReceived;
-    }
+    //    _client.OnJoinedChannel += Client_OnJoinedChannel;
+    //    _client.OnMessageReceived += Client_OnMessageReceived;
+    //}
 
-    private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
-    {
-        _logger.LogInformation("Twitch bot joined the chat");
-        _client.SendMessage(e.Channel, "imGlitch Streamnesia bot connected!");
-    }
+    //private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
+    //{
+    //    _logger.LogInformation("Twitch bot joined the chat");
+    //    _client.SendMessage(e.Channel, "imGlitch Streamnesia bot connected!");
+    //}
 
-    private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
-        => MessageReceived?.Invoke(this, new MessageEventArgs(e.ChatMessage.UserId, e.ChatMessage.Message));
+    //private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
+    //    => MessageReceived?.Invoke(this, new MessageEventArgs(e.ChatMessage.UserId, e.ChatMessage.Message));
 
-    public Task<Result> ConnectAsync(CancellationToken cancellationToken = default)
-    {
-        if (_client?.IsConnected ?? false)
-        {
-            _logger.LogWarning("Attempted to connect an already connected client.");
-            return Task.FromResult(Result.Fail("The client is already connected."));
-        }
+    //public Task<Result> ConnectAsync(CancellationToken cancellationToken = default)
+    //{
+    //    if (_client?.IsConnected ?? false)
+    //    {
+    //        _logger.LogWarning("Attempted to connect an already connected client.");
+    //        return Task.FromResult(Result.Fail("The client is already connected."));
+    //    }
 
-        var config = _configStorage.ReadTwitchBotConfig();
+    //    var config = _configStorage.ReadTwitchBotConfig();
 
-        try
-        {
-            var credentials = new ConnectionCredentials(config.BotName, config.BotApiKey);
-            var clientOptions = new ClientOptions
-            {
-                MessagesAllowedInPeriod = 750,
-                ThrottlingPeriod = TimeSpan.FromSeconds(30)
-            };
+    //    try
+    //    {
+    //        var credentials = new ConnectionCredentials(config.BotName, config.BotApiKey);
+    //        var clientOptions = new ClientOptions
+    //        {
+    //            MessagesAllowedInPeriod = 750,
+    //            ThrottlingPeriod = TimeSpan.FromSeconds(30)
+    //        };
 
-            var customClient = new WebSocketClient(clientOptions);
-            _client = new TwitchClient(customClient);
-            _client.Initialize(credentials, config.TwitchChannelName);
-            _client.Connect();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An exception ocurred during Twitch client connection");
-            return Task.FromResult(Result.Fail("An exception occurred during client connection"));
-        }
+    //        var customClient = new WebSocketClient(clientOptions);
+    //        _client = new TwitchClient(customClient);
+    //        _client.Initialize(credentials, config.TwitchChannelName);
+    //        _client.Connect();
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        _logger.LogError(e, "An exception ocurred during Twitch client connection");
+    //        return Task.FromResult(Result.Fail("An exception occurred during client connection"));
+    //    }
 
-        return Task.FromResult(Result.Ok());
-    }
+    //    return Task.FromResult(Result.Ok());
+    //}
 }
