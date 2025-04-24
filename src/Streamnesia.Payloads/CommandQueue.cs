@@ -14,14 +14,14 @@ public class CommandQueue(
     ICommandPreprocessor commandPreprocessor,
     ILogger<CommandQueue> logger) : ICommandQueue
 {
-    private readonly ConcurrentQueue<PayloadModel> _payloadQueue = new();
+    private readonly ConcurrentQueue<ParsedPayload> _payloadQueue = new();
     private readonly ConcurrentQueue<TimedInstruction> _instructionQueue = new();
 
     private CancellationTokenSource? _cts;
     private Task? _processingTask;
     private readonly object _lock = new();
 
-    public void AddPayload(PayloadModel model)
+    public void AddPayload(ParsedPayload model)
     {
         if (string.IsNullOrWhiteSpace(model.Name))
         {
@@ -120,14 +120,14 @@ public class CommandQueue(
         }
     }
 
-    private void ProcessPayload(PayloadModel model)
+    private void ProcessPayload(ParsedPayload model)
     {
         logger.LogDebug("processing payload: {Name}", model.Name);
         foreach (var sequenceItem in model.Sequence)
         {
             try
             {
-                var code = commandPreprocessor.PreprocessCommand(File.ReadAllText(sequenceItem.File));
+                var code = commandPreprocessor.PreprocessCommand(sequenceItem.AngelCode);
                 _instructionQueue.Enqueue(new TimedInstruction
                 {
                     Angelcode = code,

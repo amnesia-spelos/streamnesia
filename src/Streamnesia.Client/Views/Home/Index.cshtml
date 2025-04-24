@@ -36,8 +36,9 @@
                     </div>
                 </div>
 
-                <button onclick="loadPayloadsTest()" class="btn btn-outline-primary btn-sm">DEV: Load Payloads</button>
-                <button onclick="runCmdQueueTest()" class="btn btn-outline-primary btn-sm">DEV: Run Command Queue Test</button>
+                <button onclick="loadPayloadsTest()" class="btn btn-outline-primary btn-sm">📦 Load Payloads</button>
+                <button onclick="runCmdQueueTest()" class="btn btn-outline-secondary btn-sm">▶️ Run Command Queue Test</button>
+                <button onclick="startChaosTest()" class="btn btn-outline-danger btn-lg">💀 START LOCAL CHAOS</button>
             </div>
         </div>
     </main>
@@ -76,6 +77,12 @@
 
         function loadPayloadsTest() {
             connection.invoke("LoadPayloadsTest").catch(function (err) {
+                return console.error(err.toString());
+            });
+        }
+
+        function startChaosTest() {
+            connection.invoke("StartLocalChaos").catch(function (err) {
                 return console.error(err.toString());
             });
         }
