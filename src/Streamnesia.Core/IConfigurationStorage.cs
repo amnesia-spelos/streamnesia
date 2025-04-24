@@ -11,4 +11,8 @@ public interface IConfigurationStorage
     TwitchBotConfig ReadTwitchBotConfig();
 
     void WriteTwitchBotConfig(TwitchBotConfig newConfig);
+
+    PayloadLoaderConfig ReadPayloadLoaderConfig();
+
+    void WritePayloadLoaderConfig(PayloadLoaderConfig newConfig);
 }

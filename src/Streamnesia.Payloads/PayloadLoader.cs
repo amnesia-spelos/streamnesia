@@ -10,11 +10,15 @@ using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Streamnesia.Core;
+using Streamnesia.Core.Configuration;
 using Streamnesia.Core.Entities;
 
 namespace Streamnesia.Payloads;
 
-public class PayloadLoader(HttpClient httpClient, ILogger<PayloadLoader> logger) : IPayloadLoader
+public class PayloadLoader(
+    HttpClient httpClient,
+    IConfigurationStorage configStorage,
+    ILogger<PayloadLoader> logger) : IPayloadLoader
 {
     private const string PayloadsDirectory = "payloads";
     private const string PayloadsFile = "payloads.json";
@@ -23,25 +27,33 @@ public class PayloadLoader(HttpClient httpClient, ILogger<PayloadLoader> logger)
     private const string PayloadExtractionDirectory = "main-payloads";
     private const string UnpackedPayloadMainDirectory = "streamnesia-payloads-main";
 
-    // NOTE(spelos): configuration to be extracted
-    private readonly bool _downloadEnabled = true;
-    private readonly bool _useVanillaPayloads = true;
-    private readonly string _customPayloadsFile = string.Empty;
+    public IReadOnlyCollection<ParsedPayload>? Payloads { get; private set; }
 
-    public IReadOnlyCollection<ParsedPayload> Payloads { get; private set; }
+    private PayloadLoaderConfig? _currentConfig;
 
     public async Task<Result> LoadPayloadsAsync(CancellationToken cancellationToken = default)
     {
-        if (!LocalPayloadsExist() && !_downloadEnabled)
+        _currentConfig = configStorage.ReadPayloadLoaderConfig();
+
+        if (_currentConfig is null)
+        {
+            logger.LogError("Failed to read config");
+            return Result.Fail("Failed to read config");
+        }
+
+        if (!LocalPayloadsExist() && !_currentConfig.DownloadEnabled)
         {
             logger.LogError("Cannot continue because payload download is disabled and no local payloads exist.");
             return Result.Fail("No payloads exist and download is disabled");
         }
 
-        var downloadResult = await DownloadAndExtractPayloads(cancellationToken);
+        if (_currentConfig.DownloadEnabled)
+        {
+            var downloadResult = await DownloadAndExtractPayloads(cancellationToken);
 
-        if (downloadResult.IsFailed)
-            return Result.Fail(downloadResult.Errors);
+            if (downloadResult.IsFailed)
+                return Result.Fail(downloadResult.Errors);
+        }
 
         var loadResult = LoadLocalPayloads();
 
@@ -129,9 +141,12 @@ public class PayloadLoader(HttpClient httpClient, ILogger<PayloadLoader> logger)
 
     private Result LoadLocalPayloads()
     {
+        if (_currentConfig is null)
+            return Result.Fail("_currentConfig was null");
+
         ICollection<PayloadModel> payloads = [];
 
-        if (_useVanillaPayloads)
+        if (_currentConfig.UseVanillaPayloads)
         {
             if (!Directory.Exists(PayloadsDirectory))
             {
@@ -143,6 +158,13 @@ public class PayloadLoader(HttpClient httpClient, ILogger<PayloadLoader> logger)
             {
                 var json = File.ReadAllText(Path.Combine(PayloadsDirectory, PayloadsFile));
                 var vanillaPayloads = JsonSerializer.Deserialize<IEnumerable<PayloadModel>>(json);
+
+                if (vanillaPayloads is null)
+                {
+                    logger.LogError("Failed to parse vanilla payloads JSON");
+                    return Result.Fail("Failed to parse vanilla payloads JSON");
+                }
+
                 payloads = [.. payloads, .. vanillaPayloads];
             }
             catch (Exception e)
@@ -152,23 +174,33 @@ public class PayloadLoader(HttpClient httpClient, ILogger<PayloadLoader> logger)
             }
         }
 
-        if (File.Exists(_customPayloadsFile))
+        if (!string.IsNullOrWhiteSpace(_currentConfig.CustomPayloadsFile))
         {
-            try
+            if (File.Exists(_currentConfig.CustomPayloadsFile))
             {
-                var json = File.ReadAllText(_customPayloadsFile);
-                var customPayloads = JsonSerializer.Deserialize<IEnumerable<PayloadModel>>(json);
-                payloads = [.. payloads, .. customPayloads];
+                try
+                {
+                    var json = File.ReadAllText(_currentConfig.CustomPayloadsFile);
+                    var customPayloads = JsonSerializer.Deserialize<IEnumerable<PayloadModel>>(json);
+
+                    if (customPayloads is null)
+                    {
+                        logger.LogError("Failed to parse custom payloads JSON");
+                        return Result.Fail("Failed to parse custom payloads JSON");
+                    }
+
+                    payloads = [.. payloads, .. customPayloads];
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Failed to read or parse custom payloads JSON");
+                    return Result.Fail("Failed to read or parse custom payloads JSON");
+                }
             }
-            catch (Exception e)
+            else
             {
-                logger.LogError(e, "Failed to read or parse custom payloads JSON");
-                return Result.Fail("Failed to read or parse custom payloads JSON");
+                logger.LogWarning("The custom payloads file '{File}' was not found.", _currentConfig.CustomPayloadsFile);
             }
-        }
-        else
-        {
-            logger.LogWarning("The payload file '{File}' was not found.", _customPayloadsFile);
         }
 
         if (payloads.Count == 0)
@@ -195,19 +227,22 @@ public class PayloadLoader(HttpClient httpClient, ILogger<PayloadLoader> logger)
         return Result.Ok();
     }
 
-    private static ParsedPayloadSequenceItem[] ToParsedSequence(PayloadSequenceModel[] sequence)
+    private ParsedPayloadSequenceItem[] ToParsedSequence(PayloadSequenceModel[] sequence)
     {
         return [.. sequence.Select(i => new ParsedPayloadSequenceItem
         {
-            AngelCode = GetPayloadFileText(i.File),
+            AngelCode = GetPayloadFileText(i.File) ?? string.Empty,
             Delay = i.Delay
         })];
     }
 
-    private static string GetPayloadFileText(string file)
+    private string? GetPayloadFileText(string file)
     {
         if (file is null)
+        {
+            logger.LogWarning("Payload file was null");
             return null;
+        }    
 
         return File.ReadAllText(Path.Combine(PayloadsDirectory, file));
     }

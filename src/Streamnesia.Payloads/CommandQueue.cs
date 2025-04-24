@@ -17,8 +17,8 @@ public class CommandQueue(
     private readonly ConcurrentQueue<PayloadModel> _payloadQueue = new();
     private readonly ConcurrentQueue<TimedInstruction> _instructionQueue = new();
 
-    private CancellationTokenSource _cts;
-    private Task _processingTask;
+    private CancellationTokenSource? _cts;
+    private Task? _processingTask;
     private readonly object _lock = new();
 
     public void AddPayload(PayloadModel model)
@@ -147,7 +147,7 @@ public class CommandQueue(
         for (var i = 0; i < _instructionQueue.Count; i++)
         {
             logger.LogDebug("Iteration {i}", i);
-            if (_instructionQueue.TryDequeue(out TimedInstruction extension) == false)
+            if (_instructionQueue.TryDequeue(out TimedInstruction? extension) == false)
             {
                 logger.LogError("Failed to dequeue an instruction");
                 return;

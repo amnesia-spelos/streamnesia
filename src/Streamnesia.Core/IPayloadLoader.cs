@@ -7,5 +7,5 @@ public interface IPayloadLoader
 {
     Task<Result> LoadPayloadsAsync(CancellationToken cancellationToken = default);
 
-    IReadOnlyCollection<ParsedPayload> Payloads { get; }
+    IReadOnlyCollection<ParsedPayload>? Payloads { get; }
 }

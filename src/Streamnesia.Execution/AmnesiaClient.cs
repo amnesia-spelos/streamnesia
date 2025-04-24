@@ -20,15 +20,15 @@ public partial class AmnesiaClient(
 {
     public bool IsConnected => client.Connected;
 
-    public event AsyncStateChangedHandler StateChangedAsync;
+    public event AsyncStateChangedHandler? StateChangedAsync;
 
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingResponses = new();
     private readonly Stopwatch _stopwatch = new();
 
-    private NetworkStream _stream;
-    private StreamWriter _writer;
-    private StreamReader _reader;
-    private CancellationTokenSource _listenCts;
+    private NetworkStream? _stream;
+    private StreamWriter? _writer;
+    private StreamReader? _reader;
+    private CancellationTokenSource? _listenCts;
 
     // FIXME: There is definitely a better way to return errors to the UI
     private string _errorMessage = string.Empty;
@@ -115,8 +115,11 @@ public partial class AmnesiaClient(
         }
     }
 
-    private async Task<string> ReadNextLineSafe(CancellationToken cancellationToken)
+    private async Task<string?> ReadNextLineSafe(CancellationToken cancellationToken)
     {
+        if (_reader is null)
+            return null;
+
         try
         {
             var line = await _reader.ReadLineAsync(cancellationToken);
@@ -165,7 +168,13 @@ public partial class AmnesiaClient(
     }
 
     private async Task WaitForWelcomeMessageAsync(CancellationToken cancellationToken)
-    { 
+    {
+        if (_reader is null)
+        {
+            logger.LogError("Failed to read welcome message: _reader was null");
+            return;
+        }
+
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         cts.CancelAfter(TimeSpan.FromMinutes(5));
 
@@ -205,6 +214,12 @@ public partial class AmnesiaClient(
 
     public async Task<Result> ExecuteRawAsync(string rawInstruction, CancellationToken cancellationToken = default)
     {
+        if (_writer is null)
+        {
+            logger.LogError("Failed to execute raw command: _writer was null");
+            return Result.Fail("Could not execute a command due to the writer being null");
+        }
+
         _stopwatch.Restart();
 
         string tag = rawInstruction.Split(':')[0]; // e.g., "getmap" or "exec"
@@ -244,7 +259,7 @@ public partial class AmnesiaClient(
     public void Dispose()
     {
         client.Dispose();
-        _stream.Dispose();
+        _stream?.Dispose();
 
         GC.SuppressFinalize(this);
     }
