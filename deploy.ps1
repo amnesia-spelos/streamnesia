@@ -1,8 +1,4 @@
-pushd .\src\Streamnesia.ConsoleApp
-dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true -o ../deployment --self-contained
-popd
-
-pushd .\src\Streamnesia.WebApp
+pushd .\src\Streamnesia.Client
 dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true -o ../deployment --self-contained
 popd
 
