@@ -38,10 +38,13 @@ public class PayloadLoader(HttpClient httpClient, ILogger<PayloadLoader> logger)
             return Result.Fail("No payloads exist and download is disabled");
         }
 
-        var downloadResult = await DownloadAndExtractPayloads(cancellationToken);
+        if (_downloadEnabled)
+        {
+            var downloadResult = await DownloadAndExtractPayloads(cancellationToken);
 
-        if (downloadResult.IsFailed)
-            return Result.Fail(downloadResult.Errors);
+            if (downloadResult.IsFailed)
+                return Result.Fail(downloadResult.Errors);
+        }
 
         var loadResult = LoadLocalPayloads();
 
