@@ -4,11 +4,25 @@ using Streamnesia.Core.Entities;
 
 namespace Streamnesia.Client.Hubs;
 
-public class StatusHub(IAmnesiaClient amnesiaClient, ICommandQueue queue, ILogger<StatusHub> logger) : Hub
+public class StatusHub(IAmnesiaClient amnesiaClient, ICommandQueue queue, IPayloadLoader payloadLoader, ILogger<StatusHub> logger) : Hub
 {
     public Task StartAmnesiaClient() => amnesiaClient.ConnectAsync();
 
     public Task StopAmnesiaClient() => amnesiaClient.Disconnect();
+
+    public async Task LoadPayloadsTest()
+    {
+        var loadResult = await payloadLoader.LoadPayloadsAsync();
+
+        if (loadResult.IsFailed)
+        {
+            logger.LogError("Result Failed: {Result}", string.Join(", ", loadResult.Errors.Select(e => e.Message)));
+        }
+        else
+        {
+            logger.LogInformation("Payloads loaded. Loaded {Count} payloads.", payloadLoader.Payloads.Count);
+        }
+    }
 
     public async Task RunCommandQueueTest()
     {
