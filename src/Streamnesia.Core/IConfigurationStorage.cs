@@ -19,4 +19,8 @@ public interface IConfigurationStorage
     LocalChaosConfig ReadLocalChaosConfig();
 
     void WriteLocalChaosConfig(LocalChaosConfig newConfig);
+
+    TwitchPollConfig ReadTwitchPollConfig();
+
+    void WriteTwitchPollConfig(TwitchPollConfig newConfig);
 }

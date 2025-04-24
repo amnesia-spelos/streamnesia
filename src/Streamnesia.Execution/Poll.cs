@@ -87,4 +87,17 @@ public class Poll<TItem>(
         var selectedIndex = topOptions[random.Next(topOptions.Count)];
         return Options.ElementAt(selectedIndex);
     }
+
+    public int GetVotesByOptionIndex(int optionIndex)
+    {
+        logger.LogInformation("Requesting votes for option with index {Index}", optionIndex);
+
+        if (Options is null || Options.Count == 0 || optionIndex < 0 || optionIndex >= Options.Count)
+        {
+            logger.LogWarning("Requested votes for invalid option");
+            return 0;
+        }
+
+        return _votesByIdDictionary.Values.Count(v => v == optionIndex);
+    }
 }

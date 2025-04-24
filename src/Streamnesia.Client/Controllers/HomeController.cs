@@ -23,7 +23,8 @@ public class HomeController(IConfigurationStorage cfgStorage, IAmnesiaClient amn
             AmnesiaClientConfig = cfgStorage.ReadAmnesiaClientConfig(),
             TwitchBotConfig = cfgStorage.ReadTwitchBotConfig(),
             PayloadLoaderConfig = cfgStorage.ReadPayloadLoaderConfig(),
-            LocalChaosConfig = cfgStorage.ReadLocalChaosConfig()
+            LocalChaosConfig = cfgStorage.ReadLocalChaosConfig(),
+            TwitchPollConfig = cfgStorage.ReadTwitchPollConfig()
         });
     }
 
@@ -56,6 +57,7 @@ public class HomeController(IConfigurationStorage cfgStorage, IAmnesiaClient amn
         cfgStorage.WriteTwitchBotConfig(model.TwitchBotConfig);
         cfgStorage.WritePayloadLoaderConfig(model.PayloadLoaderConfig);
         cfgStorage.WriteLocalChaosConfig(model.LocalChaosConfig);
+        cfgStorage.WriteTwitchPollConfig(model.TwitchPollConfig);
 
         TempData["SuccessMessage"] = "Settings saved successfully!";
         return RedirectToAction("Settings");

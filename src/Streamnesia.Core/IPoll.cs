@@ -10,6 +10,8 @@ public interface IPoll<TItem> where TItem : class
 
     Result SetNamedVote(string name, int optionIndex);
 
+    int GetVotesByOptionIndex(int optionIndex);
+
     void ClearAllVotes();
 
     TItem GetVotedItem();

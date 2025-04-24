@@ -60,6 +60,20 @@
                 </div>
             </div>
 
+            <!-- Twitch Poll Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    Twitch Poll Chaos Config
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 mt-4">
+                        <label for="VoteRoundLengthInSeconds" class="form-label">Vote round length (seconds):</label>
+                        <input asp-for="TwitchPollConfig.VoteRoundLengthInSeconds" type="number" class="form-control" id="VoteRoundLengthInSeconds">
+                    </div>
+                    <span asp-validation-for="TwitchPollConfig.VoteRoundLengthInSeconds" class="text-danger d-block"></span>
+                </div>
+            </div>
+
             <!-- Local Chaos Section -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -67,7 +81,7 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3 mt-4">
-                        <label for="CustomPayloadsFile" class="form-label">Custom Payloads File:</label>
+                        <label for="CustomPayloadsFile" class="form-label">Payload frequency interval (seconds):</label>
                         <input asp-for="LocalChaosConfig.IntervalInSeconds" type="number" class="form-control" id="CustomPayloadsFile">
                     </div>
                     <span asp-validation-for="LocalChaosConfig.IntervalInSeconds" class="text-danger d-block"></span>
