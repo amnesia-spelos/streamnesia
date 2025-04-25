@@ -107,7 +107,7 @@ public class TwitchPollDispatcher
                         options = pollStateResult.Value.Select((kv, index) => new {
                             name = kv.Key.Name,
                             votes = kv.Value,
-                            description = $"Send <code class='code-pop'>{index}</code> in the chat to vote for:"
+                            index
                         }),
                         rapidFire = false // NOTE(spelos): Deprecated feature, might be added later
                     }

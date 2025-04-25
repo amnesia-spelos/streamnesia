@@ -32,9 +32,9 @@ public class TwitchBot : ITwitchBot
     private void Client_OnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
         _logger.LogInformation("Twitch bot joined the chat");
-        _client?.SendMessage(e.Channel, "imGlitch Streamnesia bot connected!");
+        _client?.SendMessage(e.Channel, "imGlitch Streamnesia bot connected! Type the number of payload on screen you wish to vote for.");
     }
-
+        
     private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
         => MessageReceived?.Invoke(this, new MessageEventArgs(e.ChatMessage.UserId, e.ChatMessage.Message));
 
