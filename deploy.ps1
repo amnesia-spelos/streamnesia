@@ -1,9 +1,40 @@
+# Read the Amnesia installation path from environment variable
+$amnesiaPath = $env:AMNESIA_LOCATION
+
+if ([string]::IsNullOrEmpty($amnesiaPath)) {
+    Write-Host ""
+    Write-Host "Environment variable 'AMNESIA_LOCATION' not found."
+    Write-Host "Please set it to your Amnesia: The Dark Descent installation directory."
+    Write-Host "Example:"
+    Write-Host '$env:AMNESIA_LOCATION = "C:\Program Files (x86)\Steam\steamapps\common\Amnesia The Dark Descent"'
+    Write-Host ""
+    exit 1
+}
+
+# Navigate to the Streamnesia.Client project
 pushd .\src\Streamnesia.Client
-dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true -o ../deployment --self-contained
+
+# Publish the application
+dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true -o ../../deployment --self-contained
+
+# Return to the root directory
 popd
 
-pushd .\src\deployment
-Remove-Item *.pdb
+# Clean up unnecessary files from deployment
+pushd .\deployment
+Remove-Item *.pdb -ErrorAction SilentlyContinue
+Remove-Item *.Development.json
 popd
 
-Copy-Item -Path .\src\deployment\* -Destination "C:\Program Files (x86)\Steam\steamapps\common\Amnesia The Dark Descent\streamnesia" -Recurse -force
+# Create Streamnesia folder inside the Amnesia install if it doesn't exist
+$streamnesiaPath = Join-Path $amnesiaPath "streamnesia"
+if (-not (Test-Path $streamnesiaPath)) {
+    New-Item -ItemType Directory -Path $streamnesiaPath | Out-Null
+}
+
+# Copy the deployment output to the Amnesia streamnesia folder
+Copy-Item -Path .\deployment\* -Destination $streamnesiaPath -Recurse -Force
+
+Write-Host ""
+Write-Host "Deployment completed successfully."
+Write-Host "Files copied to: $streamnesiaPath"
