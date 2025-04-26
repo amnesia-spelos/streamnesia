@@ -137,6 +137,7 @@ connection.start().catch(function (err) {
 connection.on("AmnesiaClientStateChanged", setAmnesiaTileState);
 connection.on("TwitchBotClientStateChanged", setTwitchTileState);
 connection.on("OnTwitchBotError", setTwitchError);
+connection.on("GlobalException", setGlobalException);
 
 connection.on("ChaosError", setChaosError);
 
@@ -257,4 +258,8 @@ function setChaosError(error) {
     chaosErrorLabel.style.visibility = 'visible';
     chaosErrorLabel.innerText = error;
     onAnyStateChanged();
+}
+
+function setGlobalException(details) {
+    console.error(details);
 }

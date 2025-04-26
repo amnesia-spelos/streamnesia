@@ -7,6 +7,10 @@
             <div class="alert alert-success">@TempData["SuccessMessage"]</div>
         }
 
+        <div class="alert alert-info" role="alert">
+            Don't forget to save! The save button is all the way at the bottom.
+        </div>
+
         <form asp-action="SaveSettings" method="post" id="settingsForm">
             <!-- Twitch Bot Config Section -->
             <div class="card mb-4">
@@ -33,6 +37,18 @@
                     </div>
                     <span asp-validation-for="TwitchBotConfig.BotName" class="text-danger d-block"></span>
                     <span asp-validation-for="TwitchBotConfig.BotApiKey" class="text-danger mb-2 d-block"></span>
+                    <div class="alert alert-primary" role="alert">
+                        <h4 class="alert-heading">Getting your twitch bot information</h4>
+                        <p>In order to get your twitch bot up and running, you will need to obtain a bot API key. Don't worry, it's just a couple of clicks and a login.</p>
+                        <hr>
+                        <p>1) go to <a href="https://twitchtokengenerator.com/" class="alert-link">Twitch Token Generator</a>.</p>
+                        <p>2) click "Bot Chat Token"</p>
+                        <p>3) log in - verify you're not a robot</p>
+                        <p>4) under "Generated Tokens" copy the value of "ACCESS TOKEN"</p>
+                        <p>5) Paste the token into the API Key section above and you're done</p>
+                        <p class="mb-0">6) the bot name should be the username with which you logged in, channel name is the channel where you will stream</p>
+                    </div>
+                    
                 </div>
             </div>
 
