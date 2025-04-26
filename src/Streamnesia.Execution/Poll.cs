@@ -90,7 +90,7 @@ public class Poll<TItem>(
 
     public int GetVotesByOptionIndex(int optionIndex)
     {
-        logger.LogInformation("Requesting votes for option with index {Index}", optionIndex);
+        logger.LogDebug("Requesting votes for option with index {Index}", optionIndex);
 
         if (Options is null || Options.Count == 0 || optionIndex < 0 || optionIndex >= Options.Count)
         {

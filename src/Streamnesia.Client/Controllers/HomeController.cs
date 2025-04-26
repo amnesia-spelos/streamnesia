@@ -5,13 +5,18 @@ using Streamnesia.Core;
 
 namespace Streamnesia.Client.Controllers;
 
-public class HomeController(IConfigurationStorage cfgStorage, IAmnesiaClient amnesiaClient) : Controller
+public class HomeController(
+    IConfigurationStorage cfgStorage,
+    IAmnesiaClient amnesiaClient,
+    ITwitchBot twitchBot
+    ) : Controller
 {
     public IActionResult Index()
     {
         return View(new IndexViewModel
         {
-            CurrentAmnesiaClientState = amnesiaClient.State
+            CurrentAmnesiaClientState = amnesiaClient.State,
+            CurrentTwitchBotState = twitchBot.State
         });
     }
 

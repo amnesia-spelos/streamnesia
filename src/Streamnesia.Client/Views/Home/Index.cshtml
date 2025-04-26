@@ -2,47 +2,90 @@
 
 <div class="container">
     <main role="main" class="pb-3">
-        <div class="text-center">
-            <img src="~/img/tada-spelos.webp" width="350" height="350" />
-            <h1 class="display-4">Welcome to Streamnesia 3.0</h1>
-            <p>The next generation of the crazy chaos mod you know and love!</p>
+        <div id="SplashScreen">
+            <div class="row">
+                <div class="col-2 ms-auto">
+                    <button type="button" class="btn-close" aria-label="Close" onclick="closeSplash()"></button>
+                </div>
+            </div>
+            <div class="text-center">
+                <img src="~/img/tada-spelos.webp" width="350" height="350" />
+                <h1 class="display-4">Welcome to Streamnesia 3.0</h1>
+                <p>The next generation of the crazy chaos mod you know and love!</p>
+            </div>
         </div>
         <div class="container py-4">
             <div class="row g-2">
                 <div class="col-md-6">
                     <div class="card border">
                         <div id="AmnesiaTile" class="card-body d-flex align-items-center gap-3">
-                            <div id="AmnesiaTileCircle" class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+                            <div id="AmnesiaTileCircle" class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                <img src="~/img/game-icon.svg" width="30" height="30" class="d-block mx-auto mt-1" />
+                            </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">Amnesia Game Client</h6>
                                 <small id="AmnesiaTileDesc" class="text-muted"></small>
                             </div>
-                            <div id="AmnesiaTileActionsDiv">
-                            </div>
+                            <div id="AmnesiaTileActionsDiv"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="card border">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+                        <div id="TwitchTile" class="card-body d-flex align-items-center gap-3">
+                            <div id="TwitchTileCircle" class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                <img src="~/img/robot-icon.svg" width="25" height="25" class="d-block mx-auto mt-1" />
+                            </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">Twitch Bot</h6>
-                                <small class="text-muted">Not running</small>
+                                <small id="TwitchTileDesc" class="text-muted"></small>
                             </div>
-                            <button class="btn btn-outline-dark btn-sm">Start</button>
+                            <div id="TwitchTileActionsDiv"></div>
                         </div>
                     </div>
                 </div>
 
+                <button id="TwitchChaosBtn" onclick="startTwitchPoll()" class="btn btn-primary btn-lg" disabled>Start Twitch Poll</button>
+                <button id="LocalChaosBtn" onclick="startLocalChaos()" class="btn btn-secondary btn-lg" disabled>Start Local Chaos</button>
+
+                <div class="text-center">
+                    <div id="ChaosErrorLabel" style="visibility: hidden" class="alert alert-danger" role="alert">
+                    </div>
+                </div>
+
+                <div class="card mb-4 p-3" style="border: 2px solid black;">
+                    <div class="row g-3 align-items-center">
+
+                        <!-- Left: Skeleton Image -->
+                        <div class="col-md-4">
+                            <img src="~/img/error-spelos.webp" class="img-fluid" alt="Spooky Skeleton" />
+                        </div>
+
+                        <!-- Right: Text and Button -->
+                        <div class="col-md-8">
+                            <h4><strong>This is an early build!</strong></h4>
+                            <p>
+                                This project is still in development. That means things might break, behave strangely, or just burst into flames, skeleton and all.
+                                <br><br>
+                                If you encounter a bug, glitch, or something that feels off, please help us improve the experience by reporting it on GitHub.
+                            </p>
+
+                            <div class="text-start mt-3">
+                                <a href="https://github.com/amnesia-spelos/streamnesia/issues/new" class="btn btn-outline-primary">
+                                    🐞 Create New Issue
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                @*              
                 <button onclick="loadPayloadsTest()" class="btn btn-outline-primary btn-sm">📦 Load Payloads</button>
                 <button onclick="startTwitchBot()" class="btn btn-outline-secondary btn-sm">🤖 Start Twitch bot</button>
                 <button onclick="runCmdQueueTest()" class="btn btn-outline-secondary btn-sm">▶️ Run Command Queue Test</button>
-                <button onclick="startTwitchPoll()" class="btn btn-outline-danger btn-lg">💀💀💀💀 START TWITCH POLL CHAOS 💀💀💀💀</button>
-                <br />
-                <br />
-                <button onclick="startChaosTest()" class="btn btn-outline-danger btn-lg">💀 START LOCAL CHAOS</button>
+                *@
             </div>
         </div>
     </main>
@@ -50,129 +93,10 @@
 
 @section Scripts
 {
+    <script src="~/js/dashboard.js"></script>
+
     <script>
-        const CircleStyleDefault = "rounded-circle bg-secondary";
-        const CircleStyleBlue = "rounded-circle bg-primary";
-        const CircleStyleGreen = "rounded-circle bg-success";
-        const CircleStyleRed = "rounded-circle bg-danger";
-
-        const amnesiaTile = document.getElementById('AmnesiaTile');
-        const amnesiaTileCircle = document.getElementById('AmnesiaTileCircle');
-        const amnesiaTileDesc = document.getElementById('AmnesiaTileDesc');
-        const amnesiaTileActionsDiv = document.getElementById('AmnesiaTileActionsDiv');
-
-        function onAmnesiaConnectPressed(event) {
-            amnesiaStartButton.disabled = true;
-            startClient();
-            event.preventDefault();
-        }
-
-        function onAmnesiaDisconnectPressed(event) {
-            amnesiaStopButton.disabled = true;
-            stopClient();
-            event.preventDefault();
-        }
-
-        function runCmdQueueTest() {
-            connection.invoke("RunCommandQueueTest").catch(function (err) {
-                return console.error(err.toString());
-            });
-        }
-
-        function loadPayloadsTest() {
-            connection.invoke("LoadPayloadsTest").catch(function (err) {
-                return console.error(err.toString());
-            });
-        }
-
-        function startChaosTest() {
-            connection.invoke("StartLocalChaos").catch(function (err) {
-                return console.error(err.toString());
-            });
-        }
-
-        function startTwitchPoll() {
-            connection.invoke("StartTwitchPollChaos").catch(function (err) {
-                return console.error(err.toString());
-            });
-        }
-
-        function startTwitchBot() {
-            connection.invoke("StartTwitchBot").catch(function (err) {
-                return console.error(err.toString());
-            });
-        }
-
-        const amnesiaStartButton = document.createElement('button');
-        amnesiaStartButton.classList.add('btn', 'btn-outline-success', 'btn-sm', 'd-block');
-        amnesiaStartButton.innerText = 'Connect';
-        amnesiaStartButton.addEventListener('click', onAmnesiaConnectPressed);
-
-        const amnesiaStopButton = document.createElement('button');
-        amnesiaStopButton.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'd-block');
-        amnesiaStopButton.innerText = 'Disconnect';
-        amnesiaStopButton.addEventListener('click', onAmnesiaDisconnectPressed);
-
-        const amnesiaWarningText = document.createElement('small');
-        amnesiaWarningText.classList.add('text-warning');
-
-        const amnesiaErrorText = document.createElement('small');
-        amnesiaErrorText.classList.add('text-danger');
-
-        const connection = new signalR.HubConnectionBuilder().withUrl("/statushub").build();
-        connection.start().catch(function (err) {
-            return console.error(err.toString());
-        });
-
         setAmnesiaTileState("@Model.CurrentAmnesiaClientState", "");
-
-        // TODO: Block until SignalR connects
-
-        connection.on("AmnesiaClientStateChanged", setAmnesiaTileState);
-
-        function startClient() {
-            connection.invoke("StartAmnesiaClient").catch(function (err) {
-                return console.error(err.toString());
-            });
-        }
-
-        function stopClient() {
-            connection.invoke("StopAmnesiaClient").catch(function (err) {
-                return console.error(err.toString());
-            });
-        }
-
-        function setAmnesiaTileState(state, message) {
-            console.log("Amnesia client state: ", state);
-
-            if (state === 'Disconnected') {
-                amnesiaTileCircle.className = CircleStyleDefault;
-                amnesiaTileDesc.innerText = 'Not running';
-                amnesiaStartButton.disabled = false;
-                amnesiaWarningText.innerText = 'Open Amnesia.exe before pressing Start';
-                amnesiaTileActionsDiv.replaceChildren(amnesiaWarningText, amnesiaStartButton);
-            }
-            else if (state === 'Connecting') {
-                amnesiaTileCircle.className = CircleStyleBlue;
-                amnesiaTileDesc.innerText = 'Connecting...';
-                amnesiaWarningText.innerText = 'Ensure the game is running and in focus';
-                amnesiaTileActionsDiv.replaceChildren(amnesiaWarningText);
-            }
-            else if (state === 'Connected') {
-                amnesiaTileCircle.className = CircleStyleGreen;
-                amnesiaTileDesc.innerText = 'Connected';
-
-                amnesiaStopButton.disabled = false;
-                amnesiaTileActionsDiv.replaceChildren(amnesiaStopButton);
-            }
-            else if (state === 'Failed') {
-                amnesiaTileCircle.className = CircleStyleRed;
-                amnesiaTileDesc.innerText = 'ERROR';
-                amnesiaErrorText.innerText = message;
-                amnesiaStartButton.disabled = false;
-                amnesiaStartButton.innerText = "Retry";
-                amnesiaTileActionsDiv.replaceChildren(amnesiaErrorText, amnesiaStartButton);
-            }
-        }
+        setTwitchTileState("@Model.CurrentTwitchBotState");
     </script>
 }

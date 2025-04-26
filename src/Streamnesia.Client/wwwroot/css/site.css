@@ -26,3 +26,101 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* OVERLAY */
+.overlay-border-frame {
+    position: relative;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.overlay-corner, .overlay-border {
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 2;
+}
+
+/* Corners */
+.overlay-corner-lu {
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    background-image: url('../img/inventory_frame_generic_corner_lu.webp');
+}
+
+.overlay-corner-ru {
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background-image: url('../img/inventory_frame_generic_corner_ru.webp');
+}
+
+.overlay-corner-ld {
+    bottom: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    background-image: url('../img/inventory_frame_generic_corner_ld.webp');
+}
+
+.overlay-corner-rd {
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background-image: url('../img/inventory_frame_generic_corner_rd.webp');
+}
+
+/* Borders */
+.overlay-border-top {
+    top: 0;
+    left: 32px;
+    right: 32px;
+    height: 32px;
+    background-image: url('../img/inventory_frame_generic_border_u.webp');
+    background-size: 100% 100%;
+}
+
+.overlay-border-bottom {
+    bottom: 0;
+    left: 32px;
+    right: 32px;
+    height: 32px;
+    background-image: url('../img/inventory_frame_generic_border_d.webp');
+    background-size: 100% 100%;
+}
+
+.overlay-border-left {
+    top: 32px;
+    bottom: 32px;
+    left: 0;
+    width: 32px;
+    background-image: url('../img/inventory_frame_generic_border_l.webp');
+    background-size: 100% 100%;
+}
+
+.overlay-border-right {
+    top: 32px;
+    bottom: 32px;
+    right: 0;
+    width: 32px;
+    background-image: url('../img/inventory_frame_generic_border_r.webp');
+    background-size: 100% 100%;
+}
+
+.overlay-border {
+    border: none !important;
+}
+
+/* Inner content */
+.overlay-content {
+    position: relative;
+    z-index: 1;
+    background: #222;
+    color: white;
+    margin: 11px;
+    height: 85%;
+}

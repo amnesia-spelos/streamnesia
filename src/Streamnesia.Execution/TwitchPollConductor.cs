@@ -69,6 +69,7 @@ public class TwitchPollConductor(
         twitchBot.MessageReceived -= OnTwitchMessage;
         _started = false;
 
+        logger.LogInformation("Twitch poll conductor stopped");
         return Result.Ok();
     }
 

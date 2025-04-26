@@ -51,118 +51,113 @@
         </div>
     </div>
     <div class="row mt-1 no-gutters" id="CardsList">
-        @*<div class="col-3 p-1">
-                <div class="card text-white bg-dark">
-                    <div class="card-header">
-                        Send <code class='code-pop'>0</code> in the chat to vote for:
+        @*<div class="overlay-border-frame col-3 p-1">
+            <div class="overlay-corner overlay-corner-lu"></div>
+            <div class="overlay-corner overlay-corner-ru"></div>
+            <div class="overlay-corner overlay-corner-ld"></div>
+            <div class="overlay-corner overlay-corner-rd"></div>
+
+            <div class="overlay-border overlay-border-top"></div>
+            <div class="overlay-border overlay-border-bottom"></div>
+            <div class="overlay-border overlay-border-left"></div>
+            <div class="overlay-border overlay-border-right"></div>
+
+            <div class="overlay-content">
+                <div class="row">
+                    <div class="col-9 p-3 ms-3">
+                        <span>Short title</span>
                     </div>
-                    <div class="card-body">
-                        <h5 class="card-title">Tilt Player Head 45 Degrees (30 seconds)</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">0 votes</h6>
+                    <div class="col-2 ms-auto p-2 me-2">
+                        <span class="badge text-bg-warning" style="font-size: 20px">0</span>
                     </div>
+                </div>
+                <div class="row">
+                    <h6 class="card-subtitle mb-2 text-muted ms-3">2 votes</h6>
                 </div>
             </div>
-            <div class="col-3 p-1">
-                <div class="card text-white bg-dark">
-                    <div class="card-header">
-                        Send <code class='code-pop'>1</code> in the chat to vote for:
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">Tilt Player Head 45 Degrees (30 seconds)</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">2 votes</h6>
-                    </div>
-                </div>
-            </div>
-            <div class="col-3 p-1">
-                <div class="card text-white bg-dark">
-                    <div class="card-header">
-                        Send <code class='code-pop'>2</code> in the chat to vote for:
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">Tilt Player Head 45 Degrees (30 seconds)</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">0 votes</h6>
-                    </div>
-                </div>
-            </div>
-            <div class="col-3 p-1">
-                <div class="card text-white bg-dark">
-                    <div class="card-header">
-                        Send <code class='code-pop'>3</code> in the chat to vote for:
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">Tilt Player Head 45 Degrees (30 seconds)</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">0 votes</h6>
-                    </div>
-                </div>
-            </div>*@
-    </div>
-    <div class="row mt-1 no-gutters">
-        <div class="col-12">
-@*             <div class="alert alert-danger invisible" role="alert" id="RapidFireAlert">
-                <div class="spinner-grow text-danger float-left" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-                <p style="margin: 4px 0px 0px 40px"><strong>RAPID FIRE!</strong> Votes instantly make things happen! <strong>FEEL FREE TO SPAM THOSE NUMBERS</strong></p>
-            </div> *@
-        </div>
-    </div>
+        </div>*@
+    </div> 
 </div>
 
 @section Scripts
 {
-<script>
-    const connection = new signalR.HubConnectionBuilder().withUrl("/overlayhub").build();
+    <script>
+        const connection = new signalR.HubConnectionBuilder().withUrl("/overlayhub").build();
 
-    function cardFromData(data) {
-        var col = document.createElement('div');
-        col.classList.add('col-3');
-        col.classList.add('p-1');
+        function cardFromData(data) {
+            console.log(data);
+            const frameDiv = document.createElement('div');
+            frameDiv.classList.add('overlay-border-frame', 'col-3', 'p-1');
 
-        var card = document.createElement('div');
-        card.classList.add('card');
-        card.classList.add('text-white');
-        card.classList.add('bg-dark');
+            ['lu', 'ru', 'ld', 'rd'].forEach(pos => {
+                const corner = document.createElement('div');
+                corner.classList.add('overlay-corner', `overlay-corner-${pos}`);
+                frameDiv.appendChild(corner);
+            });
 
-        var cardHeader = document.createElement('div');
-        cardHeader.classList.add('card-header');
-        cardHeader.innerHTML = data.description;
+            ['top', 'bottom', 'left', 'right'].forEach(side => {
+                const border = document.createElement('div');
+                    border.classList.add('overlay-border', `overlay-border-${side}`);
+                frameDiv.appendChild(border);
+            });
 
-        var cardBody = document.createElement('div');
-        cardBody.classList.add('card-body');
+            const content = document.createElement('div');
+                content.classList.add('overlay-content');
 
-        var cardTitle = document.createElement('h5');
-        cardTitle.classList.add('card-title');
-        cardTitle.textContent = data.name;
+            const row1 = document.createElement('div');
+            row1.classList.add('row');
 
-        var cardSubtitle = document.createElement('h6');
-        cardSubtitle.classList.add('card-subtitle');
-        cardSubtitle.classList.add('mb-2');
-        cardSubtitle.classList.add('text-muted');
-        cardSubtitle.textContent = data.votes;
+            const colLeft = document.createElement('div');
+            colLeft.classList.add('col-9', 'p-3', 'ms-3');
+            const titleSpan = document.createElement('span');
+            titleSpan.textContent = data.name;
+            colLeft.appendChild(titleSpan);
 
-        col.appendChild(card);
-        card.appendChild(cardHeader);
-        card.appendChild(cardBody);
-        cardBody.appendChild(cardTitle);
-        cardBody.appendChild(cardSubtitle);
+            const colRight = document.createElement('div');
+            colRight.classList.add('col-2', 'ms-auto', 'p-2', 'me-2');
+            const badge = document.createElement('span');
+            badge.classList.add('badge', 'text-bg-warning');
+            badge.style.fontSize = '20px';
+            badge.textContent = data.index;
+            colRight.appendChild(badge);
 
-        return col;
-    }
+            row1.appendChild(colLeft);
+            row1.appendChild(colRight);
 
-    const f = document.getElementById('t');
-    const cont = document.getElementById('CardsList')
+            const row2 = document.createElement('div');
+            row2.classList.add('row');
 
-    connection.on("UpdateTimePercentage", function (data) {
-        console.log('received data:', data);
+            const subtitle = document.createElement('h6');
+            subtitle.classList.add('card-subtitle', 'mb-2', 'text-muted', 'ms-3');
+            subtitle.textContent = `${data.votes} vote${data.votes === 1 ? '' : 's'}`;
 
-        f.style.setProperty('width', (data.percentage) + '%');
+            row2.appendChild(subtitle);
 
-        cont.innerHTML = "";
-        for (let i = 0; i < data.options.length; i++) {
-            cont.appendChild(cardFromData(data.options[i]));
+            content.appendChild(row1);
+            content.appendChild(row2);
+            frameDiv.appendChild(content);
+
+            return frameDiv;
         }
-    });
 
-    connection.start();
-</script>
+        const f = document.getElementById('t');
+        const cont = document.getElementById('CardsList');
+
+        connection.on("UpdateTimePercentage", function (data) {
+            console.log('received data:', data);
+
+            f.style.setProperty('width', (data.percentage) + '%');
+
+            cont.innerHTML = "";
+            for (let i = 0; i < data.options.length; i++) {
+                cont.appendChild(cardFromData(data.options[i]));
+            }
+        });
+
+        // NOTE(spelos): For easier testing without the need for SignalR
+        // cont.appendChild(cardFromData({ name: 'My JS Card', index: 0, votes: 0  }));
+        // cont.appendChild(cardFromData({ name: 'My Very Long JS Card with a title that will expand stuff downwards to test layout', index: 1, votes: 9999  }));
+
+        connection.start();
+    </script>
 }

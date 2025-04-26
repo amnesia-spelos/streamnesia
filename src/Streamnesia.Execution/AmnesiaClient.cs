@@ -20,7 +20,7 @@ public partial class AmnesiaClient(
 {
     public bool IsConnected => client.Connected;
 
-    public event AsyncStateChangedHandler? StateChangedAsync;
+    public event AsyncAmnesiaStateChangedHandler? StateChangedAsync;
 
     private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _pendingResponses = new();
     private readonly Stopwatch _stopwatch = new();
@@ -55,7 +55,7 @@ public partial class AmnesiaClient(
         {
             try
             {
-                await ((AsyncStateChangedHandler)handler)(this, newState, _errorMessage);
+                await ((AsyncAmnesiaStateChangedHandler)handler)(this, newState, _errorMessage);
                 _errorMessage = string.Empty;
             }
             catch (Exception e)
@@ -234,12 +234,9 @@ public partial class AmnesiaClient(
 
         await _writer.WriteLineAsync(rawInstruction);
 
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        cts.CancelAfter(TimeSpan.FromSeconds(10));
-
         try
         {
-            var response = await tcs.Task.WaitAsync(cts.Token);
+            var response = await tcs.Task.WaitAsync(cancellationToken);
             _stopwatch.Stop();
 
             logger.LogInformation("Game Response: {response} (in {ElapsedMilliseconds}ms)", response, _stopwatch.ElapsedMilliseconds);

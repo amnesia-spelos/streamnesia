@@ -76,13 +76,25 @@ public class StatusHub(
         logger.LogInformation("We're done.");
     }
 
-    public void StartLocalChaos()
+    public async Task StartLocalChaos()
     {
+        var loadResult = await payloadLoader.LoadPayloadsAsync();
+
+        if (loadResult.IsFailed)
+        {
+            var error = string.Join(", ", loadResult.Errors.Select(e => e.Message));
+            logger.LogError("Payload Load Failed: {Error}", error);
+            await Clients.All.SendAsync("ChaosError", error);
+            return;
+        }
+
         var result = localConductor.Start();
 
         if (result.IsFailed)
         {
-            logger.LogError("Result Failed: {Result}", string.Join(", ", result.Errors.Select(e => e.Message)));
+            var error = string.Join(", ", result.Errors.Select(e => e.Message));
+            logger.LogError("Result Failed: {Error}", error);
+            await Clients.All.SendAsync("ChaosError", error);
             return;
         }
 
@@ -91,11 +103,23 @@ public class StatusHub(
 
     public async Task StartTwitchPollChaos()
     {
+        var loadResult = await payloadLoader.LoadPayloadsAsync();
+
+        if (loadResult.IsFailed)
+        {
+            var error = string.Join(", ", loadResult.Errors.Select(e => e.Message));
+            logger.LogError("Payload Load Failed: {Error}", error);
+            await Clients.All.SendAsync("ChaosError", error);
+            return;
+        }
+
         var result = await twitchConductor.InitializeAsync();
 
         if (result.IsFailed)
         {
-            logger.LogError("Result Failed: {Result}", string.Join(", ", result.Errors.Select(e => e.Message)));
+            var error = string.Join(", ", result.Errors.Select(e => e.Message));
+            logger.LogError("Result Failed: {Error}", error);
+            await Clients.All.SendAsync("ChaosError", error);
             return;
         }
 
@@ -113,5 +137,13 @@ public class StatusHub(
         }
 
         logger.LogInformation("Twitch bot started...");
+    }
+
+    public void StopTwitchBot() => twitchBot.Stop();
+
+    public void StopAllConductors()
+    {
+        localConductor.Stop();
+        twitchConductor.Stop();
     }
 }
