@@ -12,20 +12,32 @@
   </a>
 </p>
 
-Streamnesia is a "Chaos Mod", meaning it changes what happens during your playthrough of the game. Your screen can be upside down for a minute, or maybe all doors unlock.
+Streamnesia is a chaos mod for Amnesia: The Dark Descent, where random chaotic effects happen during your playthrough — like flipped screens, doors unlocking, and much more.
 
 ## Payloads
 
-📦 By default, the application downloads a collection of community-made payloads. If you would like to browse them, or if you would like to contribute, see the [streamnesia-payloads repository](https://github.com/amnesia-spelos/streamnesia-payloads).
+📦 Streamnesia automatically downloads a collection of community-made payloads on first run.
+
+If you would like to browse them, or if you would like to contribute, see the [streamnesia-payloads repository](https://github.com/amnesia-spelos/streamnesia-payloads).
 
 ## Install & Play
 
-1. See the [Release Page](https://github.com/amnesia-spelos/streamnesia/releases) and download a build of the mod
-2. ⚠️ This section is still work in progress and the installation instructions will be updated with the new 3.0 release, where the flow will change
+Before you begin, you'll need a copy of [Amnesia: The Dark Descent](https://amnesiagame.com/) — we recommend grabbing it [on Steam](https://store.steampowered.com/app/57300/Amnesia_The_Dark_Descent/).
+
+- If you know what you're doing, you can download the latest version of Streamnesia by going to the [Release Page](https://github.com/amnesia-spelos/streamnesia/releases)
+- **Detailed instructions** can be found in the [Installing and Updating Streamnesia](https://github.com/amnesia-spelos/streamnesia/wiki/setup) section of our wiki.
 
 ## Contributing
 
-🎉 If you would like to contribute to this project, stay tuned. A contributing guide is being worked on, as well as onboarding materials and good first issues.
+### There are many ways to contribute to Streamnesia, even if you don't know how to code! 🌞
+
+If you are considering helping out, feel free to read through our [CONTRIBUTING document](docs/CONTRIBUTING.md) designed with absolute beginners in mind.
+
+No rush, we're not going anywhere. ☺️
+
+## The incredible people making Streamnesia possible
+
+Join the ranks of these open source developers and contribute today! 🚀
 
 <a href="https://github.com/amnesia-spelos/streamnesia/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=amnesia-spelos/streamnesia" />
