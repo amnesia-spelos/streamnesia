@@ -9,6 +9,7 @@ builder.Services.AddSignalR();
 builder.Services.AddStreamnesiaDependencies(builder.Configuration);
 builder.Services.AddSingleton<AmnesiaClientEventDispatcher>();
 builder.Services.AddSingleton<TwitchPollDispatcher>();
+builder.Services.AddSingleton<TwitchClientEventDispatcher>();
 
 var app = builder.Build();
 
@@ -33,5 +34,6 @@ app.MapControllerRoute(
 // ensuring this gets activated on startup
 app.Services.GetRequiredService<AmnesiaClientEventDispatcher>();
 app.Services.GetRequiredService<TwitchPollDispatcher>();
+app.Services.GetRequiredService<TwitchClientEventDispatcher>();
 
 await app.RunAsync();

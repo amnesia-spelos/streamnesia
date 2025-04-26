@@ -19,37 +19,46 @@
                 <div class="col-md-6">
                     <div class="card border">
                         <div id="AmnesiaTile" class="card-body d-flex align-items-center gap-3">
-                            <div id="AmnesiaTileCircle" class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+                            <div id="AmnesiaTileCircle" class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                <img src="~/img/game-icon.svg" width="30" height="30" class="d-block mx-auto mt-1" />
+                            </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">Amnesia Game Client</h6>
                                 <small id="AmnesiaTileDesc" class="text-muted"></small>
                             </div>
-                            <div id="AmnesiaTileActionsDiv">
-                            </div>
+                            <div id="AmnesiaTileActionsDiv"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="card border">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="rounded-circle bg-secondary" style="width: 40px; height: 40px;"></div>
+                        <div id="TwitchTile" class="card-body d-flex align-items-center gap-3">
+                            <div id="TwitchTileCircle" class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                <img src="~/img/robot-icon.svg" width="25" height="25" class="d-block mx-auto mt-1" />
+                            </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">Twitch Bot</h6>
-                                <small class="text-muted">Not running</small>
+                                <small id="TwitchTileDesc" class="text-muted"></small>
                             </div>
-                            <button class="btn btn-outline-dark btn-sm">Start</button>
+                            <div id="TwitchTileActionsDiv"></div>
                         </div>
                     </div>
                 </div>
 
+                <button id="TwitchChaosBtn" onclick="startTwitchPoll()" class="btn btn-primary btn-lg" disabled>Start Twitch Poll</button>
+                <button id="LocalChaosBtn" onclick="startLocalChaos()" class="btn btn-secondary btn-lg" disabled>Start Local Chaos</button>
+
+                <div class="text-center">
+                    <div id="ChaosErrorLabel" style="visibility: hidden" class="alert alert-danger" role="alert">
+                    </div>
+                </div>
+
+                @*              
                 <button onclick="loadPayloadsTest()" class="btn btn-outline-primary btn-sm">📦 Load Payloads</button>
                 <button onclick="startTwitchBot()" class="btn btn-outline-secondary btn-sm">🤖 Start Twitch bot</button>
                 <button onclick="runCmdQueueTest()" class="btn btn-outline-secondary btn-sm">▶️ Run Command Queue Test</button>
-                <button onclick="startTwitchPoll()" class="btn btn-outline-danger btn-lg">💀💀💀💀 START TWITCH POLL CHAOS 💀💀💀💀</button>
-                <br />
-                <br />
-                <button onclick="startChaosTest()" class="btn btn-outline-danger btn-lg">💀 START LOCAL CHAOS</button>
+                *@
             </div>
         </div>
     </main>
@@ -61,5 +70,6 @@
 
     <script>
         setAmnesiaTileState("@Model.CurrentAmnesiaClientState", "");
+        setTwitchTileState("@Model.CurrentTwitchBotState");
     </script>
 }
