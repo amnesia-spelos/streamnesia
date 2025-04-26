@@ -1,17 +1,16 @@
 # Streamnesia
 
 <p align="center">
-  <a href="docs/LICENSE.md">
-    <img src="https://img.shields.io/github/license/petrspelos/Streamnesia?style=for-the-badge">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/amnesia-spelos/streamnesia?style=for-the-badge">
   </a>
-  <a href="#">
+  <a href="https://github.com/amnesia-spelos/streamnesia/actions">
     <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/amnesia-spelos/streamnesia/.github%2Fworkflows%2Fdotnet.yml?branch=master&style=for-the-badge">
   </a>
   <a href="https://dot.net">
     <img src="https://img.shields.io/badge/made%20with-.NET%209-blueviolet?style=for-the-badge">
   </a>
 </p>
-
 
 Streamnesia is a "Chaos Mod", meaning it changes what happens during your playthrough of the game. Your screen can be upside down for a minute, or maybe all doors unlock.
 
