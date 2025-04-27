@@ -16,6 +16,8 @@ public partial class CommandPreprocessor(Random random) : ICommandPreprocessor
         command = MinifyRegex().Replace(command, "").Trim();
         command = string.Format(command, GenerateGuids());
         command = command.Replace("<<RANDOM_MUSIC>>", GetRandomOggMusic());
+        command = command.Replace("{{", "{");
+        command = command.Replace("}}", "}");
 
         return command;
     }
