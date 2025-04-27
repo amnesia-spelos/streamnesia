@@ -6,6 +6,12 @@ This is a living document used to track key architectural and design decisions m
 
 ---
 
+## [2025-04-26] Amnesia source code extracted to amnesia-tdd-tcp
+
+The decision log about comm protocol and game is going to continue in the [amnesia-tdd-tcp repository](https://github.com/amnesia-spelos/amnesia-tdd-tcp).
+
+---
+
 ## [2025-04-23] Payload Auto-Download Defaults to On
 
 **Decision:** Keep the behavior consistent with earlier versions — always download payloads on startup.  
