@@ -15,13 +15,13 @@ if ([string]::IsNullOrEmpty($amnesiaPath)) {
 pushd .\src\Streamnesia.Client
 
 # Publish the application
-dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true -o ../../deployment --self-contained
+dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true -o ../../deployment/streamnesia/ --self-contained
 
 # Return to the root directory
 popd
 
 # Clean up unnecessary files from deployment
-pushd .\deployment
+pushd .\deployment\streamnesia
 Remove-Item *.pdb -ErrorAction SilentlyContinue
 Remove-Item *.Development.json
 popd
@@ -32,8 +32,11 @@ if (-not (Test-Path $streamnesiaPath)) {
     New-Item -ItemType Directory -Path $streamnesiaPath | Out-Null
 }
 
+$amnesiaExePath = Join-Path $amnesiaPath "Amnesia.exe"
+Copy-Item -Path $amnesiaExePath -Destination .\deployment\Amnesia.exe -Force
+
 # Copy the deployment output to the Amnesia streamnesia folder
-Copy-Item -Path .\deployment\* -Destination $streamnesiaPath -Recurse -Force
+Copy-Item -Path .\deployment\streamnesia\* -Destination $streamnesiaPath -Recurse -Force
 
 Write-Host ""
 Write-Host "Deployment completed successfully."
