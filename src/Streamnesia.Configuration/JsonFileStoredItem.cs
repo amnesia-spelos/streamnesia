@@ -17,7 +17,7 @@ public class JsonFileStoredItem<TItem> : IStoredItem<TItem> where TItem : class
         _jsonFileInfo = new(Path.Combine(paths.ApplicationSettingsDirectory.FullName, fileName));
     }
 
-    public bool Exists => _jsonFileInfo.Exists;
+    public bool Exists => File.Exists(_jsonFileInfo.FullName);
 
     public Result Overwrite(TItem item)
     {
