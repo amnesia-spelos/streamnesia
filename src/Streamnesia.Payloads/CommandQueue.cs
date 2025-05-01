@@ -155,7 +155,7 @@ public class CommandQueue(
 
             if (DateTime.Now >= extension.ExecuteAfterDateTime)
             {
-                logger.LogInformation("Sending code: {Angelcode}", extension.Angelcode);
+                logger.LogDebug("Sending code: {Angelcode}", extension.Angelcode);
                 await amnesiaClient.ExecuteCommandAsync(extension.Angelcode, CancellationToken.None);
                 return;
             }
