@@ -6,6 +6,9 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using Streamnesia.Core;
 using Streamnesia.Core.Configuration;
+using System.Collections;
+using Streamnesia.Core.Entities;
+using System.Collections.Generic;
 
 namespace Streamnesia.Execution;
 
@@ -19,6 +22,8 @@ public class LocalPayloadConductor(
     private LocalChaosConfig? _config;
     private CancellationTokenSource? _loopCts;
     private Task? _loopTask;
+
+    private readonly Queue<ParsedPayload> _payloadQueue = new();
 
     public Result Start()
     {
@@ -45,10 +50,30 @@ public class LocalPayloadConductor(
         commandQueue.Start();
         logger.LogInformation("Command queue started");
 
+        FillPayloadQueue();
+
         _loopCts = new();
         _loopTask = RunLoopAsync(_loopCts.Token);
 
         return Result.Ok();
+    }
+
+    private void FillPayloadQueue()
+    {
+        if (_config is null || payloadLoader.Payloads is null)
+        {
+            logger.LogError("Failed to fill up the payload queue");
+            return;
+        }    
+
+        var payloads = _config.IsSequential
+            ? [.. payloadLoader.Payloads]
+            : payloadLoader.Payloads.OrderBy(_ => Guid.NewGuid()).ToList();
+
+        foreach (var payload in payloads)
+        {
+            _payloadQueue.Enqueue(payload);
+        }
     }
 
     public Result Stop()
@@ -77,10 +102,16 @@ public class LocalPayloadConductor(
 
             try
             {
-                var randomPayload = payloadLoader.Payloads.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+                if (_payloadQueue.Count < 1)
+                {
+                    FillPayloadQueue();
+                }
+
+                var randomPayload = _payloadQueue.Dequeue();
 
                 if (randomPayload is not null)
                 {
+                    logger.LogDebug("Payload Queue contains {Count} item(s).", _payloadQueue.Count);
                     logger.LogInformation("Adding random payload: {PayloadName}", randomPayload.Name);
                     commandQueue.AddPayload(randomPayload);
                 }

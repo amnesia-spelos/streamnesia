@@ -101,6 +101,10 @@
                         <input asp-for="LocalChaosConfig.IntervalInSeconds" type="number" class="form-control" id="CustomPayloadsFile">
                     </div>
                     <span asp-validation-for="LocalChaosConfig.IntervalInSeconds" class="text-danger d-block"></span>
+                    <div class="form-check form-switch">
+                        <input asp-for="LocalChaosConfig.IsSequential" class="form-check-input" type="checkbox" role="switch" id="IsSequential">
+                        <label class="form-check-label" for="IsSequential">Execute Payloads in order (do not randomize)</label>
+                    </div>
                 </div>
             </div>
 
