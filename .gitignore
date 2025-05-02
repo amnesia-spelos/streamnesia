@@ -803,3 +803,4 @@ $RECYCLE.BIN/
 
 *.bin.*
 deployment/
+output/

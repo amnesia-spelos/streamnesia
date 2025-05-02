@@ -4,7 +4,7 @@
 AppName=Streamnesia
 AppVersion=3.0.1
 AppPublisher=Spelos
-DefaultDirName={autopf}\Frictional Games\Amnesia The Dark Descent
+DefaultDirName={code:GetCustomInstallDir}
 DefaultGroupName=Streamnesia
 OutputDir=output
 OutputBaseFilename=StreamnesiaInstaller
@@ -20,6 +20,10 @@ SetupIconFile=src/Streamnesia.Client/Lux.ico
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
 DisableFinishedPage=no
+DirExistsWarning=no
+UsePreviousAppDir=no
+DisableDirPage=no
+AppendDefaultDirName=no
 
 [Files]
 Source: "deployment\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs overwritereadonly
@@ -58,6 +62,17 @@ begin
     if DirExists('C:\Program Files (x86)\Steam\steamapps\common\Amnesia The Dark Descent') then
       Result := 'C:\Program Files (x86)\Steam\steamapps\common\Amnesia The Dark Descent';
   end;
+end;
+
+function GetCustomInstallDir(Default: string): string;
+var
+  Path: string;
+begin
+  Path := FindAmnesiaInstallPath();
+  if Path <> '' then
+    Result := Path
+  else
+    Result := Default;
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
@@ -99,23 +114,10 @@ begin
 end;
 
 procedure InitializeWizard;
-var
-  AutoDetectedPath: String;
 begin
   // Insert custom warning page after directory selection
   WarningPage := CreateOutputMsgPage(wpSelectDir, 'Warning: Overwriting Amnesia.exe',
     'Streamnesia will replace the existing Amnesia.exe file.',
     'A backup named "Amnesia_backup_before_streamnesia.exe" will be created automatically before replacement.'#13#10#13#10 +
     'If you want to revert to the original Amnesia, rename the backup to Amnesia.exe after uninstalling Streamnesia.');
-
-  // Try to auto-detect Amnesia installation path
-  AutoDetectedPath := FindAmnesiaInstallPath();
-  if AutoDetectedPath <> '' then
-  begin
-    WizardForm.DirEdit.Text := AutoDetectedPath;
-  end
-  else
-  begin
-    MsgBox('We could not auto-detect your Amnesia installation.'#13#10'Please select the folder manually.', mbInformation, MB_OK);
-  end;
 end;
