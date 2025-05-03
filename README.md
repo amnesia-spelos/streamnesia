@@ -20,6 +20,12 @@ Streamnesia is a chaos mod for Amnesia: The Dark Descent, where random chaotic e
 
 If you would like to browse them, or if you would like to contribute, see the [streamnesia-payloads repository](https://github.com/amnesia-spelos/streamnesia-payloads).
 
+## What's new? Checkout the latest dev log
+
+<a href="https://www.youtube.com/watch?v=mmOyeexdkMo" target="_blank">
+  <img src="https://i.ibb.co/hJHqPkgS/thumb.png" alt="Dev Log Thumbnail" width="480" />
+</a>
+
 ## Install & Play
 
 > [!note]
