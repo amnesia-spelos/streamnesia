@@ -22,7 +22,8 @@ If you would like to browse them, or if you would like to contribute, see the [s
 
 ## Install & Play
 
-### TL;DR? Simply follow the [Installation & Usage tutorial video](https://www.youtube.com/watch?v=RFyVM2vjVDo)
+> [!note]
+> The installation instructions have lightly changed in v3.1.0
 
 Before you begin, you'll need a copy of [Amnesia: The Dark Descent](https://amnesiagame.com/) — we recommend grabbing it [on Steam](https://store.steampowered.com/app/57300/Amnesia_The_Dark_Descent/).
 
