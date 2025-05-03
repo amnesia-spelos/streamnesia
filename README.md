@@ -23,7 +23,7 @@ If you would like to browse them, or if you would like to contribute, see the [s
 ## What's new? Checkout the latest dev log
 
 <a href="https://www.youtube.com/watch?v=mmOyeexdkMo" target="_blank">
-  <img src="https://i.ibb.co/hJHqPkgS/thumb.png" alt="Dev Log Thumbnail" width="480" />
+  <img src="https://i.ibb.co/hJHqPkgS/thumb.png?v=2" alt="Dev Log Thumbnail" width="480" />
 </a>
 
 ## Install & Play
