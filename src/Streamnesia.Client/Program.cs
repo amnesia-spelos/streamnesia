@@ -35,25 +35,22 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.Lifetime.ApplicationStarted.Register(() =>
-{
-    var localIp = GetLocalIPAddress();
-    var url = $"http://{localIp}:5000";
-
-    var qrGenerator = new QRCodeGenerator();
-    var qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
-    var asciiQr = new AsciiQRCode(qrCodeData);
-    string qrCodeAsAscii = asciiQr.GetGraphic(1);
-
-    Console.WriteLine("\nScan this QR code to open the app:");
-    Console.WriteLine(qrCodeAsAscii);
-    Console.WriteLine($"Or go to {url} on your phone/laptop on the same network");
-});
-
 // ensuring this gets activated on startup
 app.Services.GetRequiredService<AmnesiaClientEventDispatcher>();
 app.Services.GetRequiredService<TwitchPollDispatcher>();
 app.Services.GetRequiredService<TwitchClientEventDispatcher>();
+
+var localIp = GetLocalIPAddress();
+var url = $"http://{localIp}:5000";
+
+var qrGenerator = new QRCodeGenerator();
+var qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+var asciiQr = new AsciiQRCode(qrCodeData);
+string qrCodeAsAscii = asciiQr.GetGraphic(1);
+
+Console.WriteLine("\nScan this QR code to open the UI:");
+Console.WriteLine(qrCodeAsAscii);
+Console.WriteLine($"Or go to {url} on your phone/laptop on the same network");
 
 await app.RunAsync();
 
@@ -76,14 +73,7 @@ static string GetLocalIPAddress()
             if (addr.Address.AddressFamily == AddressFamily.InterNetwork &&
                 !IPAddress.IsLoopback(addr.Address))
             {
-                // Filter out VM-related or virtual adapters if needed
-                var ip = addr.Address.ToString();
-
-                // prioritize 192.168.x.x over 10.x or 172.x if multiple exist
-                if (ip.StartsWith("192.168.100."))
-                {
-                    return ip;
-                }
+                return addr.Address.ToString();
             }
         }
     }
