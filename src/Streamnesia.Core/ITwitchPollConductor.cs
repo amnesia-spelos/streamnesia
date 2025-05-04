@@ -5,6 +5,8 @@ namespace Streamnesia.Core;
 
 public interface ITwitchPollConductor // NOTE(spelos): Maybe both conductors should share IConductor?
 {
+    bool IsRunning { get; }
+
     event Func<CancellationToken, Task>? PollStartedAsync;
 
     Task<Result> InitializeAsync();

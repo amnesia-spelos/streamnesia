@@ -23,6 +23,8 @@ public class TwitchPollConductor(
 
     private bool _started = false;
 
+    public bool IsRunning => _started;
+
     public async Task<Result> InitializeAsync()
     {
         if (_started)

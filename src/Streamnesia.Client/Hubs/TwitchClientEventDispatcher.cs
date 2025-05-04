@@ -25,12 +25,13 @@ public class TwitchClientEventDispatcher
         {
             if (newState == TwitchBotState.Failed)
             {
-                await _hubContext.Clients.All.SendAsync("OnTwitchBotError", message);
+                await _hubContext.Clients.All.SendAsync("TwitchFailed", message);
                 return;
             }
 
-            _logger.LogInformation("Broadcasting Twitch bot state: {State}", newState);
-            await _hubContext.Clients.All.SendAsync("TwitchBotClientStateChanged", newState.ToString(), message);
+            var uiState = newState.ToUiState();
+            _logger.LogInformation("Broadcasting Twitch bot state: {State}", uiState.ToString());
+            await _hubContext.Clients.All.SendAsync("TwitchStateChanged", uiState.ToString());
         }
         catch (Exception ex)
         {

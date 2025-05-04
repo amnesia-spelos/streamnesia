@@ -8,15 +8,21 @@ namespace Streamnesia.Client.Controllers;
 public class HomeController(
     IConfigurationStorage cfgStorage,
     IAmnesiaClient amnesiaClient,
-    ITwitchBot twitchBot
+    ITwitchBot twitchBot,
+    ILocalPayloadConductor localConductor,
+    ITwitchPollConductor twitchConductor,
+    IPayloadLoader payloadLoader
     ) : Controller
 {
     public IActionResult Index()
     {
         return View(new IndexViewModel
         {
-            CurrentAmnesiaClientState = amnesiaClient.State,
-            CurrentTwitchBotState = twitchBot.State
+            CurrentAmnesiaClientState = amnesiaClient.State.ToUiState(),
+            CurrentTwitchBotState = twitchBot.State.ToUiState(),
+            LocalChaosRunning = localConductor.IsRunning,
+            TwitchChaosRunning = twitchConductor.IsRunning,
+            PayloadsLoaded = (payloadLoader.Payloads?.Count ?? 0) > 0
         });
     }
 
