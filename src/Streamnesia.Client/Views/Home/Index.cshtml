@@ -10,42 +10,16 @@
             </div>
             <div class="text-center">
                 <img src="~/img/tada-spelos.webp" width="350" height="350" />
-                <h1 class="display-4">Welcome to Streamnesia 3.0</h1>
+                <h1 class="display-4">Welcome to Streamnesia 3.1.0</h1>
                 <p>The next generation of the crazy chaos mod you know and love!</p>
             </div>
         </div>
+
+        <ol class="list-group list-group-numbered" id="WidgetsWrapper">
+        </ol>
+
         <div class="container py-4">
             <div class="row g-2">
-                <div class="col-md-6">
-                    <div class="card border">
-                        <div id="AmnesiaTile" class="card-body d-flex align-items-center gap-3">
-                            <div id="AmnesiaTileCircle" class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
-                                <img src="~/img/game-icon.svg" width="30" height="30" class="d-block mx-auto mt-1" />
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">Amnesia Game Client</h6>
-                                <small id="AmnesiaTileDesc" class="text-muted"></small>
-                            </div>
-                            <div id="AmnesiaTileActionsDiv"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card border">
-                        <div id="TwitchTile" class="card-body d-flex align-items-center gap-3">
-                            <div id="TwitchTileCircle" class="rounded-circle bg-secondary d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
-                                <img src="~/img/robot-icon.svg" width="25" height="25" class="d-block mx-auto mt-1" />
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">Twitch Bot</h6>
-                                <small id="TwitchTileDesc" class="text-muted"></small>
-                            </div>
-                            <div id="TwitchTileActionsDiv"></div>
-                        </div>
-                    </div>
-                </div>
-
                 <button id="TwitchChaosBtn" onclick="startTwitchPoll()" class="btn btn-primary btn-lg" disabled>Start Twitch Poll</button>
                 <button id="LocalChaosBtn" onclick="startLocalChaos()" class="btn btn-secondary btn-lg" disabled>Start Local Chaos</button>
 
@@ -79,24 +53,206 @@
                         </div>
                     </div>
                 </div>
-
-
-                @*              
-                <button onclick="loadPayloadsTest()" class="btn btn-outline-primary btn-sm">📦 Load Payloads</button>
-                <button onclick="startTwitchBot()" class="btn btn-outline-secondary btn-sm">🤖 Start Twitch bot</button>
-                <button onclick="runCmdQueueTest()" class="btn btn-outline-secondary btn-sm">▶️ Run Command Queue Test</button>
-                *@
             </div>
         </div>
     </main>
 </div>
+
+<!-- START: Payloads -->
+<template id="payload-state-ready">
+    <li class="list-group-item">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">📦</span> Load Payloads
+            </div>
+            <span class="text-wrap">First, let's load all payloads</span>
+        </div>
+        <div class="alert alert-warning" role="alert">
+            The game must <strong>NOT</strong> be running! Otherwise custom assets won't load until game restart
+        </div>
+
+        <button id="BtnLoad" type="button" class="btn btn-success w-100 mb-2">Load</button>
+    </li>
+</template>
+<template id="payload-state-progress">
+    <li class="list-group-item list-group-item-primary">
+        <div class="mb-2">
+            <div class="fw-bold mb-2">
+                <span class="me-1">📦</span> Load Payloads
+            </div>
+            <div class="d-flex align-items-center justify-content-start gap-2">
+                <div class="spinner-border spinner-border-sm text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="text-wrap">Preparing payloads...</span>
+            </div>
+        </div>
+    </li>
+</template>
+<template id="payload-state-error">
+    <li class="list-group-item list-group-item-danger">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">📦</span> Load Payloads
+            </div>
+            <span id="ErrorSpan" class="text-wrap"></span>
+        </div>
+        <button id="BtnRetry" type="button" class="btn btn-danger w-100 my-2">Retry</button>
+    </li>
+</template>
+<template id="payload-state-success">
+    <li class="list-group-item list-group-item-success">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">📦</span> Load Payloads
+            </div>
+            <span class="text-wrap">Loaded – no action needed</span>
+        </div>
+        <button id="BtnReload" type="button" class="btn btn-outline-secondary w-100 my-2">Reload</button>
+    </li>
+</template>
+<!-- END: Payloads -->
+<!-- START: Game Connection -->
+<template id="game-state-disabled">
+    <li class="list-group-item list-group-item-secondary">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🎮</span> Connect Amnesia
+            </div>
+            <span class="text-wrap">Please complete the previous step first</span>
+        </div>
+    </li>
+</template>
+<template id="game-state-ready">
+    <li class="list-group-item">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🎮</span> Connect Amnesia
+            </div>
+            <span class="text-wrap">Now it's time to start the game and connect to it</span>
+        </div>
+        <div class="alert alert-info" role="alert">
+            Open Amnesia.exe before connecting
+        </div>
+
+        <button id="BtnConnectGame" type="button" class="btn btn-success w-100 mb-2">Connect</button>
+    </li>
+</template>
+<template id="game-state-progress">
+    <li class="list-group-item list-group-item-primary">
+        <div class="mb-2">
+            <div class="fw-bold mb-2">
+                <span class="me-1">🎮</span> Connect Amnesia
+            </div>
+            <div class="d-flex align-items-center justify-content-start gap-2">
+                <div class="spinner-border spinner-border-sm text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="text-wrap">Connecting...</span>
+            </div>
+        </div>
+    </li>
+</template>
+<template id="game-state-error">
+    <li class="list-group-item list-group-item-danger">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🎮</span> Connect Amnesia
+            </div>
+            <span id="ErrorSpan" class="text-wrap"></span>
+        </div>
+        <button id="BtnRetryGame" type="button" class="btn btn-danger w-100 my-2">Retry</button>
+    </li>
+</template>
+<template id="game-state-success">
+    <li class="list-group-item list-group-item-success">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🎮</span> Connect Amnesia
+            </div>
+            <span class="text-wrap">Connected – no action needed</span>
+        </div>
+        <button id="BtnDisconnectGame" type="button" class="btn btn-outline-secondary w-100 my-2">Disconnect</button>
+    </li>
+</template>
+<!-- END: Game Connection -->
+<!-- START: Twitch bot -->
+<template id="twitch-state-disabled">
+    <li class="list-group-item list-group-item-secondary">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🤖</span> Twitch bot
+            </div>
+            <span class="text-wrap">Please complete the previous step first</span>
+        </div>
+    </li>
+</template>
+<template id="twitch-state-ready">
+    <li class="list-group-item">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🤖</span> Twitch bot
+            </div>
+            <span class="text-wrap">If your bot configuration is set up in the settings, this step will connect the Twitch bot</span>
+        </div>
+
+        <button id="BtnConnect" type="button" class="btn btn-success w-100 mb-2">Connect</button>
+    </li>
+</template>
+<template id="twitch-state-progress">
+    <li class="list-group-item list-group-item-primary">
+        <div class="mb-2">
+            <div class="fw-bold mb-2">
+                <span class="me-1">🤖</span> Twitch bot
+            </div>
+            <div class="d-flex align-items-center justify-content-start gap-2">
+                <div class="spinner-border spinner-border-sm text-primary" role="status" style="width: 1.5rem; height: 1.5rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="text-wrap">Connecting...</span>
+            </div>
+        </div>
+    </li>
+</template>
+<template id="twitch-state-error">
+    <li class="list-group-item list-group-item-danger">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🤖</span> Twitch bot
+            </div>
+            <span id="ErrorSpan" class="text-wrap"></span>
+        </div>
+        <button id="BtnRetry" type="button" class="btn btn-danger w-100 my-2">Retry</button>
+    </li>
+</template>
+<template id="twitch-state-success">
+    <li class="list-group-item list-group-item-success">
+        <div class="mb-2">
+            <div class="fw-bold">
+                <span class="me-1">🤖</span> Twitch bot
+            </div>
+            <span class="text-wrap">Connected – no action needed</span>
+        </div>
+        <button id="BtnDisconnect" type="button" class="btn btn-outline-secondary w-100 my-2">Disconnect</button>
+    </li>
+</template>
+<!-- END: Twitch bot -->
 
 @section Scripts
 {
     <script src="~/js/dashboard.js"></script>
 
     <script>
-        setAmnesiaTileState("@Model.CurrentAmnesiaClientState", "");
-        setTwitchTileState("@Model.CurrentTwitchBotState");
+        SetWidgetState("payloads", "@(Model.PayloadsLoaded ? "success" : "ready")");
+        SetWidgetState("twitch", "@(Model.CurrentTwitchBotState.ToString())");
+        SetWidgetState("amnesia", "@(Model.CurrentAmnesiaClientState.ToString())");
     </script>
+
+    @if (Model.LocalChaosRunning || Model.TwitchChaosRunning)
+    {
+        <script>
+            twitchChaosButton.disabled = true;
+            localChaosButton.disabled = true;
+        </script>
+    }
 }

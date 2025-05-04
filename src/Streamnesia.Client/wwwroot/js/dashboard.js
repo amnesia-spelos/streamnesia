@@ -1,265 +1,280 @@
-﻿const CircleStyleDefault = "rounded-circle bg-secondary";
-const CircleStyleBlue = "rounded-circle bg-primary";
-const CircleStyleGreen = "rounded-circle bg-success";
-const CircleStyleRed = "rounded-circle bg-danger";
-
-const amnesiaTile = document.getElementById('AmnesiaTile');
-const amnesiaTileCircle = document.getElementById('AmnesiaTileCircle');
-const amnesiaTileDesc = document.getElementById('AmnesiaTileDesc');
-const amnesiaTileActionsDiv = document.getElementById('AmnesiaTileActionsDiv');
-
-const twitchTile = document.getElementById('TwitchTile');
-const twitchTileCircle = document.getElementById('TwitchTileCircle');
-const twitchTileDesc = document.getElementById('TwitchTileDesc');
-const twitchTileActionsDiv = document.getElementById('TwitchTileActionsDiv');
-
-const splashScreen = document.getElementById("SplashScreen");
-
-const twitchChaosButton = document.getElementById("TwitchChaosBtn");
+﻿const twitchChaosButton = document.getElementById("TwitchChaosBtn");
 const localChaosButton = document.getElementById("LocalChaosBtn");
 
-const chaosErrorLabel = document.getElementById("ChaosErrorLabel");
+const widgetsWrapper = document.getElementById("WidgetsWrapper");
 
-function closeSplash() {
-    splashScreen.remove();
-    localStorage.setItem('NO-SPLASH', true);
-}
-
-if (localStorage.getItem('NO-SPLASH')) {
-    closeSplash();
-}
-
-function onAmnesiaConnectPressed(event) {
-    amnesiaStartButton.disabled = true;
-    startClient();
-    event.preventDefault();
-}
-
-function onAmnesiaDisconnectPressed(event) {
-    amnesiaStopButton.disabled = true;
-    stopClient();
-    event.preventDefault();
-}
-
-function onTwitchConnectPressed(event) {
-    twitchStartButton.disabled = true;
-    startTwitchBot();
-    event.preventDefault();
-}
-
-function onTwitchDisconnectPressed(event) {
-    console.log('disconnect pressed');
-    twitchStopButton.disabled = true;
-    stopTwitchBot();
-    event.preventDefault();
-}
-
-function runCmdQueueTest() {
-    connection.invoke("RunCommandQueueTest").catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
-function loadPayloadsTest() {
-    connection.invoke("LoadPayloadsTest").catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
-function startLocalChaos() {
-    localChaosButton.disabled = true;
-    twitchChaosButton.disabled = true;
-
-    connection.invoke("StartLocalChaos").catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
-function startTwitchPoll() {
-    localChaosButton.disabled = true;
-    twitchChaosButton.disabled = true;
-
-    connection.invoke("StartTwitchPollChaos").catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
-function startTwitchBot() {
-    connection.invoke("StartTwitchBot").catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
-function stopTwitchBot() {
-    connection.invoke("StopTwitchBot").catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
-const amnesiaStartButton = document.createElement('button');
-amnesiaStartButton.classList.add('btn', 'btn-outline-success', 'btn-sm', 'd-block');
-amnesiaStartButton.innerText = 'Connect';
-amnesiaStartButton.addEventListener('click', onAmnesiaConnectPressed);
-
-const amnesiaStopButton = document.createElement('button');
-amnesiaStopButton.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'dblock');
-amnesiaStopButton.innerText = 'Disconnect';
-amnesiaStopButton.addEventListener('click', onAmnesiaDisconnectPressed);
-
-const twitchStartButton = document.createElement('button');
-twitchStartButton.classList.add('btn', 'btn-outline-success', 'btn-sm', 'd-block');
-twitchStartButton.innerText = 'Connect';
-twitchStartButton.addEventListener('click', onTwitchConnectPressed);
-
-const twitchStopButton = document.createElement('button');
-twitchStopButton.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'd-block');
-twitchStopButton.innerText = 'Disconnect';
-twitchStopButton.addEventListener('click', onTwitchDisconnectPressed);
-
-const amnesiaWarningText = document.createElement('small');
-amnesiaWarningText.classList.add('text-warning');
-
-const amnesiaErrorText = document.createElement('small');
-amnesiaErrorText.classList.add('text-danger');
-
-const twitchWarningText = document.createElement('small');
-twitchWarningText.classList.add('text-warning');
-
-const twitchErrorText = document.createElement('small');
-twitchErrorText.classList.add('text-danger');
-
+/* SignalR */
 const connection = new signalR.HubConnectionBuilder().withUrl("/statushub").build();
 connection.start().catch(function (err) {
     return console.error(err.toString());
 });
 
-// TODO: Block until SignalR connects
-connection.on("AmnesiaClientStateChanged", setAmnesiaTileState);
-connection.on("TwitchBotClientStateChanged", setTwitchTileState);
-connection.on("OnTwitchBotError", setTwitchError);
-connection.on("GlobalException", setGlobalException);
+connection.on("PayloadLoadingFailed", onPayloadLoadError);
+connection.on("PayloadStateChanged", onPayloadStateChanged);
 
-connection.on("ChaosError", setChaosError);
+connection.on("AmnesiaFailed", onAmnesiaError);
+connection.on("AmnesiaStateChanged", onAmnesiaStateChanged);
 
-let amnesiaState = "Disconnected";
-let twitchState = "Disconnected";
+connection.on("TwitchFailed", onTwitchError);
+connection.on("TwitchStateChanged", onTwitchStateChanged);
 
-function onAnyStateChanged() {
-    if (amnesiaState !== "Connected") {
-        connection.invoke("StopAllConductors").catch(function (err) {
-            return console.error(err.toString());
-        });
+const WidgetStates = {
+    Payloads: {
+        status: "Ready",
+        message: ""
+    },
+    Amnesia: {
+        status: "Disabled",
+        message: ""
+    },
+    Twitch: {
+        status: "Ready",
+        message: ""
+    }
+};
 
-        localChaosButton.disabled = true;
+function SetWidgetState(widgetName, state) {
+    switch (widgetName.toLowerCase()) {
+        case "payloads":
+            WidgetStates.Payloads.status = state;
+            WidgetStates.Amnesia.status = state.toLowerCase() === "success"
+                ? "ready"
+                : "disabled";
+            WidgetStates.Twitch.status = state.toLowerCase() === "success"
+                ? "ready"
+                : "disabled";
+            break;
+        case "amnesia":
+            WidgetStates.Amnesia.status = state;
+            if (state.toLowerCase() === "success") {
+                // TODO: Enable Local Chaos
+            } else {
+                // TODO: Disable Local Chaos
+                // TODO: Disable Twitch Chaos
+            }
+            break;
+        case "twitch":
+            WidgetStates.Twitch.status = state;
+            if (state.toLowerCase() === "success") {
+                // TODO: Enable Twitch Chaos
+            } else {
+                // TODO: Disable Twitch Chaos
+            }
+            break;
+        default:
+    }
+
+    if (WidgetStates.Amnesia.status.toLowerCase() !== "success") {
         twitchChaosButton.disabled = true;
-    }
-    else {
+        localChaosButton.disabled = true;
+    } else {
         localChaosButton.disabled = false;
-
-        if (twitchState === "Connected") {
-            twitchChaosButton.disabled = false;
-        }
-        else {
-            connection.invoke("StopAllConductors").catch(function (err) {
-                return console.error(err.toString());
-            });
-            twitchChaosButton.disabled = true;
-        }
+        twitchChaosButton.disabled = WidgetStates.Twitch.status.toLowerCase() !== "success";
     }
+
+    _renderWidgetStates();
 }
 
-function startClient() {
+function _renderWidgetStates() {
+    widgetsWrapper.innerHTML = "";
+
+    _renderWidget(`payload-state-${WidgetStates.Payloads.status.toLowerCase()}`, element => {
+        switch (WidgetStates.Payloads.status.toLowerCase()) {
+            case "ready":
+                element
+                    .getElementById("BtnLoad")
+                    .addEventListener("click", onLoadPayloadsClicked);
+                break;
+            case "progress":
+                // NO-OP
+                break;
+            case "error":
+                element
+                    .getElementById("BtnRetry")
+                    .addEventListener("click", onLoadPayloadsClicked);
+                element
+                    .getElementById("ErrorSpan")
+                    .innerText = WidgetStates.Payloads.message;
+                break;
+            case "success":
+                element
+                    .getElementById("BtnReload")
+                    .addEventListener("click", onLoadPayloadsClicked);
+                break;
+            default:
+        }
+    });
+
+    _renderWidget(`game-state-${WidgetStates.Amnesia.status.toLowerCase()}`, element => {
+        switch (WidgetStates.Amnesia.status.toLowerCase()) {
+            case "disabled":
+                // NO-OP
+                break;
+            case "ready":
+                element
+                    .getElementById("BtnConnectGame")
+                    .addEventListener("click", onConnectGameClicked);
+                break;
+            case "progress":
+                // NO-OP
+                break;
+            case "error":
+                element
+                    .getElementById("BtnRetryGame")
+                    .addEventListener("click", onConnectGameClicked);
+                element
+                    .getElementById("ErrorSpan")
+                    .innerText = WidgetStates.Amnesia.message;
+                break;
+            case "success":
+                element
+                    .getElementById("BtnDisconnectGame")
+                    .addEventListener("click", onDisconnectGameClicked);
+                break;
+            default:
+        }
+    });
+
+    _renderWidget(`twitch-state-${WidgetStates.Twitch.status.toLowerCase()}`, element => {
+        switch (WidgetStates.Twitch.status.toLowerCase()) {
+            case "ready":
+                element
+                    .getElementById("BtnConnect")
+                    .addEventListener("click", onTwitchConnectClicked);
+                break;
+            case "disabled":
+                // NO-OP
+                break;
+            case "progress":
+                // NO-OP
+                break;
+            case "error":
+                element
+                    .getElementById("BtnRetry")
+                    .addEventListener("click", onTwitchConnectClicked);
+                element
+                    .getElementById("ErrorSpan")
+                    .innerText = WidgetStates.Twitch.message;
+                break;
+            case "success":
+                element
+                    .getElementById("BtnDisconnect")
+                    .addEventListener("click", onTwitchDisconnectClicked);
+                break;
+            default:
+        }
+    });
+}
+
+function onLoadPayloadsClicked(event) {
+    console.log("onLoadPayloadsClicked");
+    event.target.disabled = true;
+    connection.invoke("LoadPayloads").catch(function (err) {
+        return console.error(err.toString());
+    });
+    event.preventDefault();
+}
+
+function onConnectGameClicked(event) {
+    console.log("onConnectGameClicked");
+    event.target.disabled = true;
     connection.invoke("StartAmnesiaClient").catch(function (err) {
         return console.error(err.toString());
     });
+    event.preventDefault();
 }
 
-function stopClient() {
+function onDisconnectGameClicked(event) {
+    console.log("onDisconnectGameClicked");
+    event.target.disabled = true;
     connection.invoke("StopAmnesiaClient").catch(function (err) {
+        return console.error(err.toString());
+    });
+    event.preventDefault();
+}
+
+function onTwitchConnectClicked(event) {
+    console.log("onTwitchConnectClicked");
+    event.target.disabled = true;
+    connection.invoke("StartTwitchBot").catch(function (err) {
+        return console.error(err.toString());
+    });
+    event.preventDefault();
+}
+
+function onTwitchDisconnectClicked(event) {
+    console.log("onTwitchDisconnectClicked");
+    event.target.disabled = true;
+    connection.invoke("StopTwitchBot").catch(function (err) {
+        return console.error(err.toString());
+    });
+    event.preventDefault();
+}
+
+function startTwitchPoll() {
+    twitchChaosButton.disabled = true;
+    localChaosButton.disabled = true;
+    connection.invoke("StartTwitchPollChaos").catch(function (err) {
         return console.error(err.toString());
     });
 }
 
-function setAmnesiaTileState(state, message) {
-    console.log("Amnesia client state: ", state);
-    amnesiaState = state;
-    onAnyStateChanged();
-
-    if (state === 'Disconnected') {
-        amnesiaTileCircle.className = CircleStyleDefault;
-        amnesiaTileDesc.innerText = 'Not running';
-        amnesiaStartButton.disabled = false;
-        amnesiaWarningText.innerText = 'Open Amnesia.exe before pressing Start';
-        amnesiaTileActionsDiv.replaceChildren(amnesiaWarningText, amnesiaStartButton);
-    }
-    else if (state === 'Connecting') {
-        amnesiaTileCircle.className = CircleStyleBlue;
-        amnesiaTileDesc.innerText = 'Connecting...';
-        amnesiaWarningText.innerText = 'Ensure the game is running and in focus';
-        amnesiaTileActionsDiv.replaceChildren(amnesiaWarningText);
-    }
-    else if (state === 'Connected') {
-        amnesiaTileCircle.className = CircleStyleGreen;
-        amnesiaTileDesc.innerText = 'Connected';
-
-        amnesiaStopButton.disabled = false;
-        amnesiaTileActionsDiv.replaceChildren(amnesiaStopButton);
-    }
-    else if (state === 'Failed') {
-        amnesiaTileCircle.className = CircleStyleRed;
-        amnesiaTileDesc.innerText = 'ERROR';
-        amnesiaErrorText.innerText = message;
-        amnesiaStartButton.disabled = false;
-        amnesiaStartButton.innerText = "Retry";
-        amnesiaTileActionsDiv.replaceChildren(amnesiaErrorText, amnesiaStartButton);
-    }
+function startLocalChaos() {
+    twitchChaosButton.disabled = true;
+    localChaosButton.disabled = true;
+    connection.invoke("StartLocalChaos").catch(function (err) {
+        return console.error(err.toString());
+    });
 }
 
-function setTwitchTileState(state) {
-    console.log("Twitch bot state: ", state);
-    twitchState = state;
-    onAnyStateChanged();
+/**
+ * Renders a widget by cloning a template and applying a custom action to it.
+ *
+ * @param {string} templateId - The ID of the <template> element to clone.
+ * @param {(clone: DocumentFragment) => void} actionFunc - A callback function that modifies the cloned content before it's appended.
+ */
+function _renderWidget(templateId, actionFunc) {
+    const template = document.getElementById(templateId);
 
-    if (state === 'Disconnected') {
-        twitchTileCircle.className = CircleStyleDefault;
-        twitchTileDesc.innerText = 'Not running';
-        twitchStartButton.disabled = false;
-        twitchWarningText.innerText = 'Don\'t forget to set your Bot Config in the settings';
-        twitchTileActionsDiv.replaceChildren(twitchWarningText, twitchStartButton);
+    if (!template) {
+        console.error("Template with the following ID was not found:", templateId);
+        return;
     }
-    else if (state == 'Connecting')
-    {
-        twitchTileCircle.className = CircleStyleBlue;
-        twitchTileDesc.innerText = 'Connecting...';
-        twitchTileActionsDiv.replaceChildren();
-    }
-    else if (state == 'Connected') {
-        twitchTileCircle.className = CircleStyleGreen;
-        twitchTileDesc.innerText = 'Connected';
 
-        twitchStopButton.disabled = false;
-        twitchTileActionsDiv.replaceChildren(twitchStopButton);
+    if (typeof actionFunc !== 'function') {
+        console.error("Expected actionFunc to be a function.");
+        return;
     }
-    else if (state === 'Failed') {
-        setTwitchError('Please retry to see the error details')
-    }
+
+    const clone = template.content.cloneNode(true);
+    actionFunc(clone);
+    widgetsWrapper.appendChild(clone);
 }
 
-function setTwitchError(error) {
-    twitchTileCircle.className = CircleStyleRed;
-    twitchTileDesc.innerText = 'ERROR';
-    twitchErrorText.innerText = error;
-    twitchStartButton.disabled = false;
-    twitchStartButton.innerText = 'Retry';
-    twitchTileActionsDiv.replaceChildren(twitchErrorText, twitchStartButton);
+/* SignalR Callbacks */
+function onPayloadLoadError(error) {
+    WidgetStates.Payloads.message = error;
+    SetWidgetState("payloads", "error");
 }
 
-function setChaosError(error) {
-    chaosErrorLabel.style.visibility = 'visible';
-    chaosErrorLabel.innerText = error;
-    onAnyStateChanged();
+function onPayloadStateChanged(newState) {
+    SetWidgetState("payloads", newState);
 }
 
-function setGlobalException(details) {
-    console.error(details);
+function onAmnesiaError(error) {
+    WidgetStates.Amnesia.message = error;
+    SetWidgetState("amnesia", "error");
+}
+
+function onAmnesiaStateChanged(newState) {
+    SetWidgetState("amnesia", newState);
+}
+
+function onTwitchError(error) {
+    WidgetStates.Twitch.message = error;
+    SetWidgetState("twitch", "error");
+}
+
+function onTwitchStateChanged(newState) {
+    SetWidgetState("twitch", newState);
 }

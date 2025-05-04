@@ -25,6 +25,8 @@ public class LocalPayloadConductor(
 
     private readonly Queue<ParsedPayload> _payloadQueue = new();
 
+    public bool IsRunning { get; private set; }
+
     public Result Start()
     {
         _config = cfgStorage.ReadLocalChaosConfig();
@@ -52,6 +54,7 @@ public class LocalPayloadConductor(
 
         FillPayloadQueue();
 
+        IsRunning = true;
         _loopCts = new();
         _loopTask = RunLoopAsync(_loopCts.Token);
 
@@ -125,5 +128,7 @@ public class LocalPayloadConductor(
                 logger.LogError(ex, "Exception occurred during chaos payload loop.");
             }
         }
+
+        IsRunning = false;
     }
 }

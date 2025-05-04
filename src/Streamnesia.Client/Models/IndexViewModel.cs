@@ -1,10 +1,23 @@
-﻿using Streamnesia.Core;
-
-namespace Streamnesia.Client.Models;
+﻿namespace Streamnesia.Client.Models;
 
 public class IndexViewModel
 {
-    public AmnesiaClientState CurrentAmnesiaClientState { get; set; }
+    public UiWidgetState CurrentAmnesiaClientState { get; set; }
 
-    public TwitchBotState CurrentTwitchBotState { get; set; }
+    public UiWidgetState CurrentTwitchBotState { get; set; }
+
+    public bool LocalChaosRunning { get; set; }
+
+    public bool TwitchChaosRunning { get; set; }
+
+    public bool PayloadsLoaded { get; set; }
+}
+
+public enum UiWidgetState
+{
+    Disabled,
+    Ready,
+    Progress,
+    Error,
+    Success
 }

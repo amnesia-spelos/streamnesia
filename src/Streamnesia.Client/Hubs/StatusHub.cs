@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Streamnesia.Client.Models;
 using Streamnesia.Core;
 using Streamnesia.Core.Entities;
 
@@ -13,67 +14,40 @@ public class StatusHub(
     ITwitchBot twitchBot,
     ILogger<StatusHub> logger) : Hub
 {
-    public Task StartAmnesiaClient() => amnesiaClient.ConnectAsync();
+    public async Task StartAmnesiaClient()
+    {
+        await Clients.All.SendAsync("AmnesiaStateChanged", UiWidgetState.Progress);
+        await amnesiaClient.ConnectAsync();
+    }
 
     public Task StopAmnesiaClient() => amnesiaClient.Disconnect();
 
-    public async Task LoadPayloadsTest()
+    public async Task LoadPayloads()
     {
+        if (twitchBot.IsConnected)
+        {
+            twitchBot.Stop();
+        }
+
+        if (amnesiaClient.IsConnected)
+        {
+            await amnesiaClient.Disconnect();
+        }
+
+        await Clients.All.SendAsync("PayloadStateChanged", UiWidgetState.Progress.ToString());
         var loadResult = await payloadLoader.LoadPayloadsAsync();
 
         if (loadResult.IsFailed)
         {
-            logger.LogError("Result Failed: {Result}", string.Join(", ", loadResult.Errors.Select(e => e.Message)));
+            var reasons = string.Join(", ", loadResult.Errors.Select(e => e.Message));
+            logger.LogError("Result Failed: {Result}", reasons);
+            await Clients.All.SendAsync("PayloadLoadingFailed", reasons);
         }
         else
         {
             logger.LogInformation("Payloads loaded. Loaded {Count} payloads.", payloadLoader.Payloads?.Count);
+            await Clients.All.SendAsync("PayloadStateChanged", UiWidgetState.Success.ToString());
         }
-    }
-
-    public async Task RunCommandQueueTest()
-    {
-        queue.AddPayload(new ParsedPayload
-        {
-            Name = "test payload 1",
-            Sequence = [
-                new ParsedPayloadSequenceItem
-                {
-                    AngelCode = "SetPlayerActive(false);",
-                    Delay = TimeSpan.FromSeconds(0)
-                },
-                new ParsedPayloadSequenceItem
-                {
-                    AngelCode = "SetPlayerActive(true);",
-                    Delay = TimeSpan.FromSeconds(1)
-                },
-                new ParsedPayloadSequenceItem
-                {
-                    AngelCode = "SetPlayerActive(false);",
-                    Delay = TimeSpan.FromSeconds(2)
-                }
-            ]
-        });
-        queue.AddPayload(new ParsedPayload
-        {
-            Name = "test payload 2",
-            Sequence = [
-                new ParsedPayloadSequenceItem
-                {
-                    AngelCode = "SetPlayerActive(true);",
-                    Delay = TimeSpan.FromSeconds(3)
-                }
-            ]
-        });
-
-        queue.Start();
-        logger.LogInformation("Queue started");
-
-        logger.LogInformation("Waiting for 10 seconds before stopping the queue");
-        await Task.Delay(TimeSpan.FromSeconds(10));
-
-        await queue.StopAsync();
-        logger.LogInformation("We're done.");
     }
 
     public async Task StartLocalChaos()
@@ -128,11 +102,14 @@ public class StatusHub(
 
     public async Task StartTwitchBot()
     {
+        await Clients.All.SendAsync("TwitchStateChanged", UiWidgetState.Progress);
         var result = await twitchBot.ConnectAsync();
 
         if (result.IsFailed)
         {
-            logger.LogError("Result Failed: {Result}", string.Join(", ", result.Errors.Select(e => e.Message)));
+            var reasons = string.Join(", ", result.Errors.Select(e => e.Message));
+            logger.LogError("Result Failed: {Result}", reasons);
+            await Clients.All.SendAsync("TwitchFailed", reasons);
             return;
         }
 
