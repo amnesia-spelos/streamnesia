@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Streamnesia.Core;
+using Streamnesia.Core.Conductors;
 using Streamnesia.Core.Entities;
 
-namespace Streamnesia.Execution;
+namespace Streamnesia.Execution.Conductors;
 
 public class TwitchPollConductor(
     IAmnesiaClient amnesiaClient,

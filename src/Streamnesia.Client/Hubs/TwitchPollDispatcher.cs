@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Streamnesia.Core;
+using Streamnesia.Core.Conductors;
 
 namespace Streamnesia.Client.Hubs;
 

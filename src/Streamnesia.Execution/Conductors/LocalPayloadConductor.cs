@@ -9,8 +9,9 @@ using Streamnesia.Core.Configuration;
 using System.Collections;
 using Streamnesia.Core.Entities;
 using System.Collections.Generic;
+using Streamnesia.Core.Conductors;
 
-namespace Streamnesia.Execution;
+namespace Streamnesia.Execution.Conductors;
 
 public class LocalPayloadConductor(
     IAmnesiaClient amnesiaClient,

@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 
-namespace Streamnesia.Core;
+namespace Streamnesia.Core.Conductors;
 
 public interface ILocalPayloadConductor
 {

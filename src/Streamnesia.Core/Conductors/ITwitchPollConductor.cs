@@ -1,9 +1,9 @@
 ﻿using FluentResults;
 using Streamnesia.Core.Entities;
 
-namespace Streamnesia.Core;
+namespace Streamnesia.Core.Conductors;
 
-public interface ITwitchPollConductor // NOTE(spelos): Maybe both conductors should share IConductor?
+public interface ITwitchPollConductor
 {
     bool IsRunning { get; }
 

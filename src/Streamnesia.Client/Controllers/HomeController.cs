@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Streamnesia.Client.Models;
 using Streamnesia.Core;
+using Streamnesia.Core.Conductors;
 
 namespace Streamnesia.Client.Controllers;
 
