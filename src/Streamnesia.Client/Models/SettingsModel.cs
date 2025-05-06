@@ -13,4 +13,6 @@ public class SettingsModel
     public required LocalChaosConfig LocalChaosConfig { get; set; }
 
     public required TwitchPollConfig TwitchPollConfig { get; set; }
+
+    public required DeveloperConfig DeveloperConfig { get; set; }
 }

@@ -8,103 +8,27 @@ public class ConfigurationStorage(
     IStoredItem<TwitchBotConfig> storedTwitchBotCfg,
     IStoredItem<PayloadLoaderConfig> storedPayloadLoaderCfg,
     IStoredItem<LocalChaosConfig> storedLocalChaosCfg,
-    IStoredItem<TwitchPollConfig> storedTwitchPollCfg
+    IStoredItem<TwitchPollConfig> storedTwitchPollCfg,
+    IStoredItem<DeveloperConfig> storedDeveloperCfg
     ) : IConfigurationStorage
 {
     public AmnesiaClientConfig ReadAmnesiaClientConfig()
-    {
-        var cfg = storedAmnesiaClientCfg.Retrieve();
-
-        if (cfg.IsFailed)
-        {
-            // TODO: propagate better
-            throw new InvalidOperationException("storage operation failed");
-        }
-
-        if (cfg.Value is not null)
-            return cfg.Value;
-
-        var newCfg = new AmnesiaClientConfig();
-        storedAmnesiaClientCfg.Overwrite(newCfg);
-
-        return newCfg;
-    }
+        => ReadOrCreate(storedAmnesiaClientCfg);
 
     public TwitchBotConfig ReadTwitchBotConfig()
-    {
-        var cfg = storedTwitchBotCfg.Retrieve();
-
-        if (cfg.IsFailed)
-        {
-            // TODO: propagate better
-            throw new InvalidOperationException("storage operation failed");
-        }
-
-        if (cfg.Value is not null)
-            return cfg.Value;
-
-        var newCfg = new TwitchBotConfig();
-        storedTwitchBotCfg.Overwrite(newCfg);
-
-        return newCfg;
-    }
+        => ReadOrCreate(storedTwitchBotCfg);
 
     public PayloadLoaderConfig ReadPayloadLoaderConfig()
-    {
-        var cfg = storedPayloadLoaderCfg.Retrieve();
-
-        if (cfg.IsFailed)
-        {
-            // TODO: propagate better
-            throw new InvalidOperationException("storage operation failed");
-        }
-
-        if (cfg.Value is not null)
-            return cfg.Value;
-
-        var newCfg = new PayloadLoaderConfig();
-        storedPayloadLoaderCfg.Overwrite(newCfg);
-
-        return newCfg;
-    }
+        => ReadOrCreate(storedPayloadLoaderCfg);
 
     public LocalChaosConfig ReadLocalChaosConfig()
-    {
-        var cfg = storedLocalChaosCfg.Retrieve();
-
-        if (cfg.IsFailed)
-        {
-            // TODO: propagate better
-            throw new InvalidOperationException("storage operation failed");
-        }
-
-        if (cfg.Value is not null)
-            return cfg.Value;
-
-        var newCfg = new LocalChaosConfig();
-        storedLocalChaosCfg.Overwrite(newCfg);
-
-        return newCfg;
-    }
+        => ReadOrCreate(storedLocalChaosCfg);
 
     public TwitchPollConfig ReadTwitchPollConfig()
-    {
-        var cfg = storedTwitchPollCfg.Retrieve();
+        => ReadOrCreate(storedTwitchPollCfg);
 
-        if (cfg.IsFailed)
-        {
-            // TODO: propagate better
-            throw new InvalidOperationException("storage operation failed");
-        }
-
-        if (cfg.Value is not null)
-            return cfg.Value;
-
-        var newCfg = new TwitchPollConfig();
-        storedTwitchPollCfg.Overwrite(newCfg);
-
-        return newCfg;
-    }
+    public DeveloperConfig ReadDeveloperConfig()
+        => ReadOrCreate(storedDeveloperCfg);
 
     public void WriteAmnesiaClientConfig(AmnesiaClientConfig newConfig)
         => storedAmnesiaClientCfg.Overwrite(newConfig);
@@ -123,5 +47,27 @@ public class ConfigurationStorage(
         => storedLocalChaosCfg.Overwrite(newConfig);
 
     public void WriteTwitchPollConfig(TwitchPollConfig newConfig)
-    => storedTwitchPollCfg.Overwrite(newConfig);
+        => storedTwitchPollCfg.Overwrite(newConfig);
+
+    public void WriteDeveloperConfig(DeveloperConfig newConfig)
+        => storedDeveloperCfg.Overwrite(newConfig);
+
+    private static TConfig ReadOrCreate<TConfig>(IStoredItem<TConfig> storedItem) where TConfig : class, new()
+    {
+        var cfg = storedItem.Retrieve();
+
+        if (cfg.IsFailed)
+        {
+            // TODO: propagate better
+            throw new InvalidOperationException("storage operation failed");
+        }
+
+        if (cfg.Value is not null)
+            return cfg.Value;
+
+        var newCfg = new TConfig();
+        storedItem.Overwrite(newCfg);
+
+        return newCfg;
+    }
 }

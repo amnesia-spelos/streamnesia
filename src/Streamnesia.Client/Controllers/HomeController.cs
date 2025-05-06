@@ -35,7 +35,8 @@ public class HomeController(
             TwitchBotConfig = cfgStorage.ReadTwitchBotConfig(),
             PayloadLoaderConfig = cfgStorage.ReadPayloadLoaderConfig(),
             LocalChaosConfig = cfgStorage.ReadLocalChaosConfig(),
-            TwitchPollConfig = cfgStorage.ReadTwitchPollConfig()
+            TwitchPollConfig = cfgStorage.ReadTwitchPollConfig(),
+            DeveloperConfig = cfgStorage.ReadDeveloperConfig()
         });
     }
 
@@ -69,6 +70,7 @@ public class HomeController(
         cfgStorage.WritePayloadLoaderConfig(model.PayloadLoaderConfig);
         cfgStorage.WriteLocalChaosConfig(model.LocalChaosConfig);
         cfgStorage.WriteTwitchPollConfig(model.TwitchPollConfig);
+        cfgStorage.WriteDeveloperConfig(model.DeveloperConfig);
 
         TempData["SuccessMessage"] = "Settings saved successfully!";
         return RedirectToAction("Settings");
