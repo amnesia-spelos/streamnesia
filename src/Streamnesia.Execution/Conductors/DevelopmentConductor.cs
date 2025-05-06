@@ -10,14 +10,18 @@ namespace Streamnesia.Execution.Conductors;
 
 internal class DevelopmentConductor(
     IAmnesiaClient amnesiaClient,
+    ICommandQueue commandQueue,
+    ICommandPreprocessor preprocessor,
     ILogger<DevelopmentConductor> logger
     ) : IDevelopmentConductor
 {
     public event Func<string, CancellationToken, Task>? OnErrorAsync;
 
-    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    private bool _commandQueueInitialized;
+
+    public async Task ExecuteCodeAsync(string angelCode, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Development conductor executed");
+        logger.LogDebug("Development conductor executed");
         
         if (!amnesiaClient.IsConnected)
         {
@@ -33,6 +37,28 @@ internal class DevelopmentConductor(
             }
         }
 
-        logger.LogInformation("Development conductor completed");
+        if (!_commandQueueInitialized)
+        {
+            logger.LogInformation("Initializing command queue");
+            commandQueue.Start();
+
+            _commandQueueInitialized = true;
+        }
+
+        commandQueue.AddPayload(new()
+        {
+            Name = "Test Payload",
+            Sequence = [
+                new()
+                {
+                    Delay = TimeSpan.FromSeconds(0),
+                    AngelCode = angelCode
+                }]
+        });
+
+        logger.LogDebug("Development conductor completed");
     }
+
+    public string PreprocessCode(string angelCode)
+        => preprocessor.PreprocessCommand(angelCode);
 }

@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IAmnesiaClient, AmnesiaClient>();
         services.AddSingleton<ILocalPayloadConductor, LocalPayloadConductor>();
         services.AddSingleton<ITwitchPollConductor, TwitchPollConductor>();
+        services.AddSingleton<IDevelopmentConductor, DevelopmentConductor>();
         services.AddSingleton(typeof(IPoll<>), typeof(Poll<>));
 
         return services;

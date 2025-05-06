@@ -4,5 +4,7 @@ public interface IDevelopmentConductor
 {
     event Func<string, CancellationToken, Task>? OnErrorAsync;
 
-    Task ExecuteAsync(CancellationToken cancellationToken = default);
+    Task ExecuteCodeAsync(string angelCode, CancellationToken cancellationToken = default);
+
+    string PreprocessCode(string angelCode);
 }
