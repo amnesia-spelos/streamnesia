@@ -23,4 +23,8 @@ public interface IConfigurationStorage
     TwitchPollConfig ReadTwitchPollConfig();
 
     void WriteTwitchPollConfig(TwitchPollConfig newConfig);
+
+    DeveloperConfig ReadDeveloperConfig();
+
+    void WriteDeveloperConfig(DeveloperConfig newConfig);
 }
