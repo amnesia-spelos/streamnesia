@@ -29,6 +29,7 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapHub<StatusHub>("/statushub");
 app.MapHub<OverlayHub>("/overlayhub");
+app.MapHub<DevHub>("/dev");
 
 app.MapControllerRoute(
     name: "default",
