@@ -28,13 +28,9 @@ If you would like to browse them, or if you would like to contribute, see the [s
 
 ## Install & Play
 
-> [!note]
-> The installation instructions have lightly changed in v3.1.0
+### **Detailed instructions** can be found in the [Installing and Updating Streamnesia](https://github.com/amnesia-spelos/streamnesia/wiki/setup) section of our wiki.
 
-Before you begin, you'll need a copy of [Amnesia: The Dark Descent](https://amnesiagame.com/) — we recommend grabbing it [on Steam](https://store.steampowered.com/app/57300/Amnesia_The_Dark_Descent/).
-
-- If you know what you're doing, you can download the latest version of Streamnesia by going to the [Release Page](https://github.com/amnesia-spelos/streamnesia/releases)
-- **Detailed instructions** can be found in the [Installing and Updating Streamnesia](https://github.com/amnesia-spelos/streamnesia/wiki/setup) section of our wiki.
+> If you know what you're doing, you can download the latest version of Streamnesia by going to the [Releases Page](https://github.com/amnesia-spelos/streamnesia/releases)
 
 ## Contributing
 
