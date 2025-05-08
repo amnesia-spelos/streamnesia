@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["PayloadDev"] = true;
+}
+
+<span>Payload Development</span>
+
+<div class="mb-3">
+    <label for="ScriptArea" class="form-label">Payload Script:</label>
+    <textarea class="form-control" id="ScriptArea" rows="10"></textarea>
+</div>
+
+<button id="ExecuteBtn" class="btn btn-primary" type="submit">Execute</button>
+<button id="PreprocessBtn" class="btn btn-secibdary" type="submit">Preview Preprocessed</button>
+
+<div class="mb-3">
+    <label for="PreprocessorOutputArea" class="form-label">Preprocessor Output:</label>
+    <textarea readonly class="form-control" id="PreprocessorOutputArea" rows="10"></textarea>
+</div>
+
+@section Scripts
+{
+    <script>
+        const executeBtn = document.getElementById('ExecuteBtn');
+        const preprocessBtn = document.getElementById('PreprocessBtn');
+        const scriptArea = document.getElementById('ScriptArea');
+        const preprocessorOutputArea = document.getElementById('PreprocessorOutputArea');
+
+        const connection = new signalR.HubConnectionBuilder().withUrl("/dev").build();
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        connection.on("ScriptPreprocessed", script => {
+            preprocessorOutputArea.value = script;
+        });
+
+        executeBtn.addEventListener('click', e => {
+            connection.invoke("ExecuteScript", scriptArea.value).catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+
+        preprocessBtn.addEventListener('click', e => {
+            connection.invoke("PreprocessScript", scriptArea.value).catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+    </script>
+}

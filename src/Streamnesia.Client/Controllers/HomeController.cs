@@ -17,13 +17,16 @@ public class HomeController(
 {
     public IActionResult Index()
     {
+        var cfg = cfgStorage.ReadDeveloperConfig();
+
         return View(new IndexViewModel
         {
             CurrentAmnesiaClientState = amnesiaClient.State.ToUiState(),
             CurrentTwitchBotState = twitchBot.State.ToUiState(),
             LocalChaosRunning = localConductor.IsRunning,
             TwitchChaosRunning = twitchConductor.IsRunning,
-            PayloadsLoaded = (payloadLoader.Payloads?.Count ?? 0) > 0
+            PayloadsLoaded = (payloadLoader.Payloads?.Count ?? 0) > 0,
+            DeveloperMode = cfg.IsEnabled
         });
     }
 
