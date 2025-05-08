@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,6 +22,9 @@ public class TwitchPollConductor(
     ) : ITwitchPollConductor
 {
     public event Func<CancellationToken, Task>? PollStartedAsync;
+
+    private readonly ConcurrentDictionary<string, ParsedPayload?> _userPockets = new();
+    private readonly ConcurrentDictionary<string, DateTime> _userPocketTimestamps = new();
 
     private bool _started = false;
 
@@ -126,6 +130,14 @@ public class TwitchPollConductor(
             return;
         }
 
+        if (e.Message.StartsWith("!pocket"))
+        {
+            logger.LogDebug("Received a pocket message: {message}", e.Message);
+            ProcessPocketMessage(e.UserId, e.Message);
+
+            return;
+        }
+
         var success = int.TryParse(e.Message, out var index);
 
         if (!success)
@@ -168,5 +180,57 @@ public class TwitchPollConductor(
             .ToDictionary(kv => kv.Key, kv => kv.Value);
 
         return Result.Ok<IReadOnlyDictionary<ParsedPayload, int>>(state);
+    }
+
+    private void ProcessPocketMessage(string user, string message)
+    {
+        if (message.Trim() == "!pocket")
+        {
+            logger.LogDebug("Pop pocket requested");
+
+            if (!_userPockets.TryGetValue(user, out ParsedPayload? payload) || payload is null)
+            {
+                logger.LogDebug("User does not have anything in their pocket");
+                return;
+            }
+
+            if (payload is not null)
+            {
+                commandQueue.AddPayload(payload);
+                _userPockets[user] = null;
+                twitchBot.SendMessage("Pocket payload executed.");
+            }
+
+            return;
+        }
+
+        var split = message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (split.Length != 2 || !int.TryParse(split[1], out var payloadIndex))
+        {
+            twitchBot.SendMessage("Pocket Usage: !pocket <payload_vote_number>");
+            return;
+        }
+
+        if (payloadIndex < 0 || payloadIndex > 3)
+        {
+            logger.LogDebug("Pocket payload index out of range.");
+            return;
+        }
+
+        if (_userPocketTimestamps.TryGetValue(user, out var timestamp) && (DateTime.Now - timestamp).TotalMinutes < 5) // TODO: Configurable option + disable pockets
+        {
+            logger.LogDebug("Pocket cooldown");
+            twitchBot.SendMessage("You can only pocket once every 5 minutes");
+            return;
+        }
+
+        var payloadToPocket = poll.Options?.ElementAt(payloadIndex);
+        if (payloadToPocket is not null)
+        {
+            _userPocketTimestamps[user] = DateTime.Now;
+            _userPockets[user] = payloadToPocket;
+            twitchBot.SendMessage($"Pocketed '{payloadToPocket.Name}'. Use '!pocket' to use it");
+            logger.LogDebug("Item pocketed: {Name}", payloadToPocket.Name);
+        }
     }
 }
