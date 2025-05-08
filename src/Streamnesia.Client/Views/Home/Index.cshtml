@@ -246,9 +246,9 @@
     <script src="~/js/dashboard.js"></script>
 
     <script>
-        SetWidgetState("payloads", "@(Model.PayloadsLoaded ? "success" : "ready")");
         SetWidgetState("twitch", "@(Model.CurrentTwitchBotState.ToString())");
         SetWidgetState("amnesia", "@(Model.CurrentAmnesiaClientState.ToString())");
+        SetWidgetState("payloads", "@(Model.PayloadsLoaded ? "success" : "ready")");
     </script>
 
     @if (Model.LocalChaosRunning || Model.TwitchChaosRunning)
