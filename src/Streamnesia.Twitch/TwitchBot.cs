@@ -20,6 +20,7 @@ public class TwitchBot(
 
     private TwitchClient? _client;
     private string _errorMessage = string.Empty;
+    private string _channel = string.Empty;
 
     public event EventHandler<MessageEventArgs>? MessageReceived;
     public event AsyncTwitchBotStateChangedHandler? StateChangedAsync;
@@ -63,6 +64,7 @@ public class TwitchBot(
         State = TwitchBotState.Connected;
         logger.LogInformation("Twitch bot joined the chat");
         _client?.SendMessage(e.Channel, "imGlitch Streamnesia bot connected! Type the number of payload on screen you wish to vote for.");
+        _channel = e.Channel;
     }
         
     private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
@@ -171,5 +173,10 @@ public class TwitchBot(
             State = TwitchBotState.Disconnected;
             logger.LogInformation("Twitch client disconnected");
         }
+    }
+
+    public void SendMessage(string message)
+    {
+        _client?.SendMessage(_channel, message);
     }
 }

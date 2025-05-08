@@ -27,4 +27,6 @@ public interface ITwitchBot : IDisposable
     void Stop(bool stateChange = true);
 
     event EventHandler<MessageEventArgs> MessageReceived;
+
+    void SendMessage(string message);
 }
