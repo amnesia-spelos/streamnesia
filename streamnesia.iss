@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Streamnesia
-AppVersion=3.0.1
+AppVersion=3.2.0
 AppPublisher=Spelos
 DefaultDirName={code:GetCustomInstallDir}
 DefaultGroupName=Streamnesia
