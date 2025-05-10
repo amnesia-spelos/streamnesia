@@ -124,4 +124,23 @@ public class StatusHub(
         localConductor.Stop();
         twitchConductor.Stop();
     }
+
+    public void UnstuckMove(string coord, float amount)
+    {
+        logger.LogInformation("Unstuck request for axis {coord} by {amount}", coord, amount);
+
+        var xMod = coord == "x" ? amount : 0.0;
+        var zMod = coord == "z" ? amount : 0.0;
+
+        queue.AddPayload(new()
+        {
+            Name = "Unstuck Request",
+            Sequence = [
+                new() {
+                    Delay = TimeSpan.Zero,
+                    AngelCode = $"SetPlayerPos(GetPlayerPosX() + {xMod}, GetPlayerPosY(), GetPlayerPosZ() + {zMod})"
+                }
+            ]
+        });
+    }
 }

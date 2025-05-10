@@ -227,6 +227,13 @@ function startLocalChaos() {
     });
 }
 
+// Unstuck
+function UnstuckMove(coord, amount) {
+    connection.invoke("UnstuckMove", coord, amount).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+
 /**
  * Renders a widget by cloning a template and applying a custom action to it.
  *
