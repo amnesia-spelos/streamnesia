@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Streamnesia</AssemblyName>
     <ApplicationIcon>Lux.ico</ApplicationIcon>
-	<VersionPrefix>3.1.0</VersionPrefix>
+	<VersionPrefix>3.2.0</VersionPrefix>
 	<UserSecretsId>3a14c90a-e11f-42f5-a624-6d9bd4d4452e</UserSecretsId>
 	<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
