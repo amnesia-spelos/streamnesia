@@ -25,6 +25,8 @@ public class TwitchPollConductor(
 
     private readonly ConcurrentDictionary<string, ParsedPayload?> _userPockets = new();
     private readonly ConcurrentDictionary<string, DateTime> _userPocketTimestamps = new();
+    private List<ParsedPayload> _allPayloads = new();
+    private int _currentPayloadIdx = 0;
 
     private bool _started = false;
 
@@ -66,7 +68,7 @@ public class TwitchPollConductor(
         {
             await PollStartedAsync.Invoke(CancellationToken.None);
         }
-
+        _allPayloads = payloadLoader.Payloads.ToList(); // We populate the list only once, while initializing
         BeginPollRound();
         return Result.Ok();
     }
@@ -80,25 +82,44 @@ public class TwitchPollConductor(
         return Result.Ok();
     }
 
+
+    /// <summary>
+    /// Shuffles the _allPayloads list in-place.
+    /// This approach provides uniform randomness and minimizes memory usage.
+    /// </summary>
+    private void ShufflePayloads()
+    {
+        for (int i = _allPayloads.Count-1; i >= 0; i--)
+        {
+            int j = Random.Shared.Next(i + 1);
+            (_allPayloads[i], _allPayloads[j]) = (_allPayloads[j], _allPayloads[i]);
+        }
+        return;
+    }
+
     public Result<IReadOnlyCollection<ParsedPayload>> BeginPollRound()
     {
-        logger.LogInformation("Starting a new round of voting");
+        if (_currentPayloadIdx + 4 > _allPayloads.Count)
+        {
+            _currentPayloadIdx = 0;
+        }
 
-        var allPayloads = payloadLoader.Payloads!;
-        if (allPayloads.Count < 4)
+        if (_currentPayloadIdx == 0)
+        {
+            ShufflePayloads();
+        }  
+        
+        if (_allPayloads.Count < 4)
         {
             logger.LogError("Less than 4 payloads available");
             return Result.Fail("Less than 4 payloads available");
         }
 
-        var shuffled = allPayloads
-            .OrderBy(_ => Guid.NewGuid())
-            .Take(4)
-            .ToList();
+        var pollOptions = _allPayloads.Skip(_currentPayloadIdx).Take(4).ToList();
+        poll.SetOptions(pollOptions);
+        _currentPayloadIdx += 4;
 
-        poll.SetOptions(shuffled);
-
-        return Result.Ok<IReadOnlyCollection<ParsedPayload>>(shuffled);
+        return Result.Ok<IReadOnlyCollection<ParsedPayload>>(pollOptions);
     }
 
     public Result ExecuteTopPayload()
