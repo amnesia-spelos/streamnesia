@@ -99,6 +99,8 @@ public class TwitchPollConductor(
 
     public Result<IReadOnlyCollection<ParsedPayload>> BeginPollRound()
     {
+        logger.LogInformation("Starting a new round of voting");
+
         if (_currentPayloadIdx + 4 > _allPayloads.Count)
         {
             _currentPayloadIdx = 0;
