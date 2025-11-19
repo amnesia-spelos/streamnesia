@@ -6,7 +6,6 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using Streamnesia.Core;
 using Streamnesia.Core.Configuration;
-using System.Collections;
 using Streamnesia.Core.Entities;
 using System.Collections.Generic;
 using Streamnesia.Core.Conductors;

@@ -1,5 +1,3 @@
-using System;
-
 namespace Streamnesia.Core.Entities;
 
 public class TimedInstruction

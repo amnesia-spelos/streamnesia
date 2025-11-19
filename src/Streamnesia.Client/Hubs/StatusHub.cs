@@ -2,7 +2,6 @@
 using Streamnesia.Client.Models;
 using Streamnesia.Core;
 using Streamnesia.Core.Conductors;
-using Streamnesia.Core.Entities;
 
 namespace Streamnesia.Client.Hubs;
 

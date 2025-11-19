@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Streamnesia.Core.Configuration;
+﻿namespace Streamnesia.Core.Configuration;
 
 public class TwitchBotConfig
 {

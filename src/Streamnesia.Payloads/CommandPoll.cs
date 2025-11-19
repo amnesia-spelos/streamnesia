@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Streamnesia.Core;
-
-namespace Streamnesia.Payloads;
+﻿namespace Streamnesia.Payloads;
 
 public class CommandPoll //: ICommandPoll
 {
