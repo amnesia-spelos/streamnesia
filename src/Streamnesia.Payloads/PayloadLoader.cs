@@ -49,7 +49,7 @@ public class PayloadLoader(
 
         if (_currentConfig.DownloadEnabled)
         {
-            var downloadResult = await DownloadAndExtractPayloads(cancellationToken);
+            var downloadResult = await DownloadAndExtractPayloadsAsync(cancellationToken);
 
             if (downloadResult.IsFailed)
                 return Result.Fail(downloadResult.Errors);
@@ -62,7 +62,7 @@ public class PayloadLoader(
 
     private static bool LocalPayloadsExist() => File.Exists(Path.Combine(PayloadsDirectory, PayloadsFile));
 
-    private async Task<Result> DownloadAndExtractPayloads(CancellationToken cancellationToken = default)
+    private async Task<Result> DownloadAndExtractPayloadsAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -87,8 +87,39 @@ public class PayloadLoader(
             }
 
             ZipFile.ExtractToDirectory(PayloadZipFile, PayloadExtractionDirectory);
-            File.Delete(Path.Combine(PayloadExtractionDirectory, UnpackedPayloadMainDirectory, "LICENSE"));
-            File.Delete(Path.Combine(PayloadExtractionDirectory, UnpackedPayloadMainDirectory, "README.md"));
+
+            var unpackedMainPath = Path.Combine(PayloadExtractionDirectory, UnpackedPayloadMainDirectory);
+            var ignoreFile = Path.Combine(unpackedMainPath, "streamnesia-ignore.json");
+            if (File.Exists(ignoreFile))
+            {
+                var ignores = JsonSerializer.Deserialize<string[]>(File.ReadAllText(ignoreFile));
+                foreach (var ignore in ignores ?? [])
+                {
+                    var targetPath = Path.Combine(unpackedMainPath, ignore);
+                    var extractedPath = Path.Combine("..", ignore);
+                    if (ignore.EndsWith('/'))
+                    {
+                        Directory.Delete(targetPath, true);
+
+                        if (Directory.Exists(extractedPath))
+                        {
+                            Directory.Delete(extractedPath, true);
+                            logger.LogInformation("Cleanup: Removed {extractedPath} residue directory.", extractedPath);
+                        }
+                    }
+                    else
+                    {
+                        File.Delete(targetPath);
+
+                        if (File.Exists(extractedPath))
+                        {
+                            File.Delete(extractedPath);
+                            logger.LogInformation("Cleanup: Removed {extractedPath} residue file.", extractedPath);
+                        }
+                    }
+                }
+            }
+
             logger.LogInformation("Extracted payloads .zip file");
 
             // NOTE(spelos): A better setup for debugging purposes would be nice
