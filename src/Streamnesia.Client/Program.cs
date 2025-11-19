@@ -4,10 +4,17 @@ using Streamnesia.Client.Extensions;
 using Streamnesia.Client.Hubs;
 using QRCoder;
 using System.Net.NetworkInformation;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSerilog();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddStreamnesiaDependencies(builder.Configuration);
