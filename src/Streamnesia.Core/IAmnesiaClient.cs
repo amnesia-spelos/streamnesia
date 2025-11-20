@@ -2,14 +2,6 @@
 
 namespace Streamnesia.Core;
 
-public enum AmnesiaClientState
-{
-    Disconnected,
-    Connecting,
-    Connected,
-    Failed
-}
-
 public delegate Task AsyncAmnesiaStateChangedHandler(object? sender, AmnesiaClientState newState, string message);
 
 public interface IAmnesiaClient : IDisposable

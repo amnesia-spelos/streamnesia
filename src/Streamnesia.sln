@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Payloads", "Streamnesia.Payloads\Streamnesia.Payloads.csproj", "{6BD5433A-933A-41F4-8A9F-743AE7FCD887}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Execution", "Streamnesia.Execution\Streamnesia.Execution.csproj", "{6472197B-2802-5A5C-5052-256363F3668A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Configuration", "Streamnesia.Configuration\Streamnesia.Configuration.csproj", "{2B943697-916A-4225-9462-66245332A3DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streamnesia.Core.Tests", "..\tests\Streamnesia.Core.Tests\Streamnesia.Core.Tests.csproj", "{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +99,18 @@ Global
 		{2B943697-916A-4225-9462-66245332A3DE}.Release|x64.Build.0 = Release|Any CPU
 		{2B943697-916A-4225-9462-66245332A3DE}.Release|x86.ActiveCfg = Release|Any CPU
 		{2B943697-916A-4225-9462-66245332A3DE}.Release|x86.Build.0 = Release|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Debug|x64.Build.0 = Debug|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Debug|x86.Build.0 = Debug|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Release|x64.ActiveCfg = Release|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Release|x64.Build.0 = Release|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Release|x86.ActiveCfg = Release|Any CPU
+		{F36B2DA4-3044-4E93-B50F-A56C78A1A67C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
